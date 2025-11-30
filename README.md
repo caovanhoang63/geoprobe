@@ -5,7 +5,8 @@
 
 > **A self-hosted, multi-location uptime monitor built with SvelteKit, SQLite, and the Globalping Network.**
 
-
+[![CI](https://github.com/user/geoprobe/actions/workflows/ci.yml/badge.svg)](https://github.com/user/geoprobe/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/user/geoprobe/graph/badge.svg)](https://codecov.io/gh/user/geoprobe)
 
 ## 📖 Introduction
 
@@ -55,10 +56,11 @@ To ensure reliable monitoring without external dependencies, GeoProbe uses `node
 
 ### Prerequisites
 
-* Node.js 18+
-* Docker (Optional but recommended)
+* Node.js 22+
+* pnpm 10+
+* Docker (recommended for production)
 
-### Installation
+### Local Development
 
 1.  **Clone the repository**
 
@@ -70,56 +72,145 @@ To ensure reliable monitoring without external dependencies, GeoProbe uses `node
 2.  **Install dependencies**
 
     ```bash
-    npm install
+    pnpm install
     ```
 
 3.  **Environment Setup**
-    Copy the example environment file:
 
     ```bash
     cp .env.example .env
     ```
 
-    *Inside `.env`:*
-
+    Edit `.env`:
     ```env
     DATABASE_URL=file:./data.db
     DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
     ```
 
 4.  **Initialize Database**
-    Push the schema using Drizzle Kit:
 
     ```bash
-    npm run db:push
+    pnpm db:push
     ```
 
 5.  **Run Development Server**
 
     ```bash
-    npm run dev
+    pnpm dev
     ```
+
+### Running Tests
+
+```bash
+# Run tests
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+```
 
 ## 📦 Deployment (Docker)
 
-The easiest way to run GeoProbe is via Docker. This ensures the background workers stay alive.
+The easiest and recommended way to run GeoProbe in production.
+
+### Quick Start with Docker Compose
+
+1. **Clone and navigate to the project**
+
+   ```bash
+   git clone https://github.com/your-username/geoprobe.git
+   cd geoprobe
+   ```
+
+2. **Configure environment** (optional)
+
+   Edit `docker-compose.yml` to add Discord webhook:
+   ```yaml
+   environment:
+     - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK
+   ```
+
+3. **Start the application**
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. **Access GeoProbe**
+
+   Open http://localhost:3000 in your browser.
+
+### Docker Compose Configuration
 
 ```yaml
-# docker-compose.yml
-version: '3'
 services:
   geoprobe:
-    image: node:18-alpine
-    working_dir: /app
-    volumes:
-      - ./data:/app/data
-    environment:
-      - DATABASE_URL=file:/app/data/geoprobe.db
-      - ORIGIN=http://localhost:3000
-    command: sh -c "npm install && npm run build && node build"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoprobe
+    restart: unless-stopped
     ports:
       - "3000:3000"
-    restart: unless-stopped
+    volumes:
+      - geoprobe_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/geoprobe.db
+      # Optional: Discord webhook for alerts
+      # - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  geoprobe_data:
+    driver: local
+```
+
+### Manual Docker Build
+
+```bash
+# Build the image
+docker build -t geoprobe .
+
+# Run the container
+docker run -d \
+  --name geoprobe \
+  -p 3000:3000 \
+  -v geoprobe_data:/app/data \
+  -e DATABASE_URL=file:/app/data/geoprobe.db \
+  geoprobe
+```
+
+### Docker Image Details
+
+| Property | Value |
+|----------|-------|
+| Base Image | Node.js 22 Alpine |
+| Image Size | ~266MB |
+| User | Non-root (sveltekit:1001) |
+| Health Check | HTTP on port 3000 |
+| Data Volume | `/app/data` (SQLite) |
+
+### Managing the Container
+
+```bash
+# View logs
+docker compose logs -f geoprobe
+
+# Stop
+docker compose down
+
+# Update to latest version
+docker compose pull
+docker compose up -d
+
+# Backup database
+docker cp geoprobe:/app/data/geoprobe.db ./backup.db
 ```
 
 ## 🗺️ Roadmap
