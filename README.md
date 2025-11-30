@@ -1,3 +1,6 @@
+> [!WARNING]
+> **AI-Generated Project:** This application was developed 100% via "vibe coding" using [Claude Code](https://www.claude.com/product/claude-code) and [ClaudeKit](https://claudekit.cc/).
+
 # 🌍 GeoProbe
 
 > **A self-hosted, multi-location uptime monitor built with SvelteKit, SQLite, and the Globalping Network.**
