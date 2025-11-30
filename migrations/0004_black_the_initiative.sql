@@ -1,0 +1,1 @@
+CREATE INDEX `active_last_checked_idx` ON `monitors` (`active`,`last_checked_at`);

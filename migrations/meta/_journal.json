@@ -22,6 +22,20 @@
       "when": 1764464382561,
       "tag": "0002_known_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1764483625175,
+      "tag": "0003_melodic_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1764484193180,
+      "tag": "0004_black_the_initiative",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `monitors` ADD `last_checked_at` text;

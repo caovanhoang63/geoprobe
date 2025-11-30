@@ -2,22 +2,29 @@ import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core
 import { relations } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
 
-export const monitors = sqliteTable('monitors', {
-	id: text('id').primaryKey().$defaultFn(() => uuid()),
-	name: text('name').notNull(),
-	url: text('url').notNull(),
-	interval: integer('interval').notNull().default(300),
-	locations: text('locations').notNull(),
-	discordWebhook: text('discord_webhook'),
-	active: integer('active', { mode: 'boolean' }).notNull().default(true),
-	public: integer('public', { mode: 'boolean' }).notNull().default(false),
-	createdAt: text('created_at')
-		.notNull()
-		.$defaultFn(() => new Date().toISOString()),
-	updatedAt: text('updated_at')
-		.notNull()
-		.$defaultFn(() => new Date().toISOString())
-});
+export const monitors = sqliteTable(
+	'monitors',
+	{
+		id: text('id').primaryKey().$defaultFn(() => uuid()),
+		name: text('name').notNull(),
+		url: text('url').notNull(),
+		interval: integer('interval').notNull().default(300),
+		locations: text('locations').notNull(),
+		discordWebhook: text('discord_webhook'),
+		active: integer('active', { mode: 'boolean' }).notNull().default(true),
+		public: integer('public', { mode: 'boolean' }).notNull().default(false),
+		lastCheckedAt: text('last_checked_at'),
+		createdAt: text('created_at')
+			.notNull()
+			.$defaultFn(() => new Date().toISOString()),
+		updatedAt: text('updated_at')
+			.notNull()
+			.$defaultFn(() => new Date().toISOString())
+	},
+	(table) => ({
+		activeLastCheckedIdx: index('active_last_checked_idx').on(table.active, table.lastCheckedAt)
+	})
+);
 
 export const measurements = sqliteTable(
 	'measurements',
