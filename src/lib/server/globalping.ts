@@ -1,8 +1,8 @@
 import type { GlobalpingRequest, GlobalpingResponse } from '$lib/types/globalping';
 
-const API_BASE = 'https://api.globalping.io/v1';
-const FETCH_TIMEOUT = 30000;
-const MAX_RETRIES = 3;
+export const API_BASE = 'https://api.globalping.io/v1';
+export const FETCH_TIMEOUT = 30000;
+export const MAX_RETRIES = 3;
 
 async function fetchWithTimeout(
 	url: string,

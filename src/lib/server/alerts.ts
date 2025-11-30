@@ -3,9 +3,9 @@ import { alerts, measurements } from './schema';
 import type { Monitor, Measurement, Alert, NewAlert } from './schema';
 import { eq, and, desc, gte } from 'drizzle-orm';
 
-const ALERT_DEBOUNCE_MS = 5 * 60 * 1000;
-const CONSECUTIVE_FAILURES_THRESHOLD = 3;
-const LATENCY_THRESHOLD_MS = 1000;
+export const ALERT_DEBOUNCE_MS = 5 * 60 * 1000;
+export const CONSECUTIVE_FAILURES_THRESHOLD = 3;
+export const LATENCY_THRESHOLD_MS = 1000;
 
 interface DiscordEmbed {
 	title: string;
@@ -187,7 +187,7 @@ async function getRecentMeasurements(monitorId: string, limit: number): Promise<
 		.limit(limit);
 }
 
-function countConsecutiveFailures(measurements: Measurement[]): number {
+export function countConsecutiveFailures(measurements: Measurement[]): number {
 	let count = 0;
 
 	for (const measurement of measurements) {
@@ -201,7 +201,7 @@ function countConsecutiveFailures(measurements: Measurement[]): number {
 	return count;
 }
 
-function getAlertEmoji(type: string): string {
+export function getAlertEmoji(type: string): string {
 	switch (type) {
 		case 'down':
 			return '🔴';
