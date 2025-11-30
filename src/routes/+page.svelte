@@ -63,35 +63,40 @@
 	function generateUptimeHistoryFromMeasurements(
 		measurements: MeasurementData[]
 	): Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> {
+		const now = Date.now();
+
 		if (!measurements || measurements.length === 0) {
 			return Array(30).fill(null).map((_, i) => ({
 				status: 'unknown' as const,
-				timestamp: Date.now() - (29 - i) * 60 * 60 * 1000
+				timestamp: now - (29 - i) * 60 * 1000
 			}));
 		}
 
-		const now = Date.now();
-		const history: Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> = [];
-
-		for (let i = 29; i >= 0; i--) {
-			const hourStart = now - (i + 1) * 60 * 60 * 1000;
-			const hourEnd = now - i * 60 * 60 * 1000;
-
-			const hourMeasurements = measurements.filter((m) => {
-				const ts = new Date(m.timestamp).getTime();
-				return ts >= hourStart && ts < hourEnd;
-			});
-
-			let status: 'up' | 'down' | 'unknown' = 'unknown';
-			if (hourMeasurements.length > 0) {
-				const successCount = hourMeasurements.filter((m) => m.status === 'success').length;
-				status = successCount / hourMeasurements.length >= 0.5 ? 'up' : 'down';
+		const uniqueTimestamps = new Map<string, MeasurementData>();
+		for (const m of measurements) {
+			const existing = uniqueTimestamps.get(m.timestamp);
+			if (!existing || m.status !== 'success') {
+				uniqueTimestamps.set(m.timestamp, m);
 			}
-
-			history.push({ status, timestamp: hourEnd });
 		}
 
-		return history;
+		const sortedMeasurements = Array.from(uniqueTimestamps.values())
+			.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+			.slice(0, 30);
+
+		const history = sortedMeasurements.map((m) => ({
+			status: (m.status === 'success' ? 'up' : 'down') as 'up' | 'down' | 'unknown',
+			timestamp: new Date(m.timestamp).getTime()
+		}));
+
+		while (history.length < 30) {
+			history.push({
+				status: 'unknown' as const,
+				timestamp: now - history.length * 60 * 1000
+			});
+		}
+
+		return history.reverse();
 	}
 
 	function generateChartDataFromMeasurements(
@@ -401,9 +406,9 @@
 			<div class="bg-[#242830] rounded-xl p-6 mb-8">
 				<div class="flex items-center justify-between mb-6">
 					<div>
-						<h2 class="text-lg font-semibold mb-1">Uptime History (Last 30 Hours)</h2>
+						<h2 class="text-lg font-semibold mb-1">Uptime History (Last 30 Checks)</h2>
 						<p class="text-sm text-[#9ca3af]">
-							{selectedMonitor?.uptimePercentage}% uptime in the last 30 hours
+							{selectedMonitor?.uptimePercentage}% uptime (24h)
 						</p>
 					</div>
 					<div
