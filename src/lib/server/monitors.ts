@@ -183,6 +183,7 @@ export async function createMonitor(data: MonitorFormData): Promise<Monitor> {
 			url: validated.url,
 			interval: validated.interval,
 			locations: JSON.stringify(validated.locations),
+			discordWebhook: validated.discordWebhook || null,
 			active: true
 		})
 		.returning();
@@ -204,6 +205,7 @@ export async function updateMonitor(id: string, data: MonitorFormData): Promise<
 			url: validated.url,
 			interval: validated.interval,
 			locations: JSON.stringify(validated.locations),
+			discordWebhook: validated.discordWebhook || null,
 			updatedAt: new Date().toISOString()
 		})
 		.where(eq(monitors.id, id))

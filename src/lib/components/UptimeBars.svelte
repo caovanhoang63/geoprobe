@@ -1,7 +1,14 @@
 <script lang="ts">
+	interface LocationLatency {
+		location: string;
+		latency: number;
+		status: string;
+	}
+
 	interface UptimeData {
 		status: 'up' | 'down' | 'unknown';
 		timestamp: number;
+		locations?: LocationLatency[];
 	}
 
 	interface Props {
@@ -17,6 +24,18 @@
 		const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 		return `${month} ${day}, ${time}`;
 	}
+
+	function getLatencyColor(latency: number): string {
+		if (latency < 200) return '#10b981';
+		if (latency < 500) return '#f59e0b';
+		return '#ef4444';
+	}
+
+	function getLatencyClass(latency: number): string {
+		if (latency < 200) return 'text-[#10b981]';
+		if (latency < 500) return 'text-[#f59e0b]';
+		return 'text-[#ef4444]';
+	}
 </script>
 
 <div class="flex gap-1 items-end h-10">
@@ -30,9 +49,23 @@
 					: 'bg-[#6b7280] hover:shadow-[0_0_8px_rgba(107,114,128,0.5)]'}"
 		>
 			<div
-				class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[#242830] border border-[#363b45] rounded-md text-[11px] text-[#e8eaed] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-10"
+				class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#242830] border border-[#363b45] rounded-lg text-[11px] text-[#e8eaed] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-10 shadow-lg"
 			>
-				{formatTimestamp(data.timestamp)}
+				<div class="font-semibold mb-1.5 text-[#9ca3af]">{formatTimestamp(data.timestamp)}</div>
+				{#if data.locations && data.locations.length > 0}
+					<div class="space-y-1">
+						{#each data.locations as loc}
+							<div class="flex items-center justify-between gap-4">
+								<span class="text-[#e8eaed] truncate max-w-[120px]">{loc.location}</span>
+								<span class="font-mono font-semibold {getLatencyClass(loc.latency)}">
+									{Math.round(loc.latency)}ms
+								</span>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="text-[#6b7280]">No data</div>
+				{/if}
 			</div>
 		</div>
 	{/each}

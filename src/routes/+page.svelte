@@ -60,39 +60,62 @@
 
 	type TimeRange = '3h' | '24h' | '7d' | '30d';
 
+	interface LocationLatency {
+		location: string;
+		latency: number;
+		status: string;
+	}
+
+	interface UptimeHistoryItem {
+		status: 'up' | 'down' | 'unknown';
+		timestamp: number;
+		locations?: LocationLatency[];
+	}
+
 	function generateUptimeHistoryFromMeasurements(
 		measurements: MeasurementData[]
-	): Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> {
+	): UptimeHistoryItem[] {
 		const now = Date.now();
 
 		if (!measurements || measurements.length === 0) {
 			return Array(30).fill(null).map((_, i) => ({
 				status: 'unknown' as const,
-				timestamp: now - (29 - i) * 60 * 1000
+				timestamp: now - (29 - i) * 60 * 1000,
+				locations: []
 			}));
 		}
 
-		const uniqueTimestamps = new Map<string, MeasurementData>();
+		const groupedByTimestamp = new Map<string, MeasurementData[]>();
 		for (const m of measurements) {
-			const existing = uniqueTimestamps.get(m.timestamp);
-			if (!existing || m.status !== 'success') {
-				uniqueTimestamps.set(m.timestamp, m);
-			}
+			const existing = groupedByTimestamp.get(m.timestamp) ?? [];
+			existing.push(m);
+			groupedByTimestamp.set(m.timestamp, existing);
 		}
 
-		const sortedMeasurements = Array.from(uniqueTimestamps.values())
-			.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+		const sortedTimestamps = Array.from(groupedByTimestamp.keys())
+			.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
 			.slice(0, 30);
 
-		const history = sortedMeasurements.map((m) => ({
-			status: (m.status === 'success' ? 'up' : 'down') as 'up' | 'down' | 'unknown',
-			timestamp: new Date(m.timestamp).getTime()
-		}));
+		const history: UptimeHistoryItem[] = sortedTimestamps.map((timestamp) => {
+			const locationMeasurements = groupedByTimestamp.get(timestamp) ?? [];
+			const hasFailure = locationMeasurements.some((m) => m.status !== 'success');
+
+			return {
+				status: (hasFailure ? 'down' : 'up') as 'up' | 'down' | 'unknown',
+				timestamp: new Date(timestamp).getTime(),
+				locations: locationMeasurements.map((m) => ({
+					location: m.location,
+					latency: m.latency,
+					status: m.status
+				}))
+			};
+		});
 
 		while (history.length < 30) {
 			history.push({
 				status: 'unknown' as const,
-				timestamp: now - history.length * 60 * 1000
+				timestamp: now - history.length * 60 * 1000,
+				locations: []
 			});
 		}
 
@@ -167,7 +190,7 @@
 				uptimeHistory: generateUptimeHistoryFromMeasurements(measurements),
 				interval: m.interval,
 				locations: JSON.parse(m.locations),
-				discordWebhook: '',
+				discordWebhook: m.discordWebhook ?? '',
 				measurements,
 				uptime30d: (m as { uptime30d?: number }).uptime30d ?? 100,
 				avgLatency: (m as { avgLatency?: number }).avgLatency ?? 0,
