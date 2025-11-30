@@ -139,6 +139,15 @@ Contributions are welcome\! Please feel free to submit a Pull Request.
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 
+
+## 💡 Inspiration & Credits
+
+This project is heavily inspired by the amazing **[Uptime Kuma](https://github.com/louislam/uptime-kuma)**.
+
+GeoProbe exists primarily to fill a specific niche: **Multi-location monitoring via the Globalping network**.
+
+> **Note:** We are huge fans of Uptime Kuma. If/when Uptime Kuma natively integrates Globalping support, **this repository will be archived/discontinued** in favor of using their robust platform. Until then, GeoProbe serves as a lightweight alternative for "vibe-coded" distributed monitoring.
+
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
