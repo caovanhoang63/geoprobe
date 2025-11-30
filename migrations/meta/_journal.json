@@ -8,6 +8,20 @@
       "when": 1764450671339,
       "tag": "0000_breezy_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1764464227300,
+      "tag": "0001_regular_fallen_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1764464382561,
+      "tag": "0002_known_gauntlet",
+      "breakpoints": true
     }
   ]
 }

@@ -1,8 +1,8 @@
 # GeoProbe Project Roadmap
 
 **Document Date**: 2025-11-30
-**Current Phase**: Phase 04 - Metrics & Visualization (Complete)
-**Next Phase**: Phase 05 - Alert System & Advanced Features
+**Current Phase**: Phase 09 - Public Status Page (Complete)
+**Next Phase**: Phase 10 - Advanced Check Types
 
 ## Executive Summary
 
@@ -133,56 +133,85 @@ GeoProbe is progressing through phases to build a complete, self-hosted multi-lo
 
 ---
 
-### Phase 05: Alert System & Advanced Features ⏳ IN PLANNING
-**Timeline**: 3-4 weeks (estimated)
-**Priority**: High
-**Status**: ○ PENDING
+### Phase 05: Monitor Configuration Form ✓ COMPLETE
+**Timeline**: Completed (2025-11-30)
+**Status**: ✓ DONE
 
-**Objectives**:
-1. Alert channel integration (Discord, Slack, Telegram)
-2. Advanced filtering and analytics
-3. Multi-user support with authentication
+**Deliverables**:
+- [x] MonitorFormModal (create/edit modes)
+- [x] UrlInput with real-time validation
+- [x] IntervalSelector (6 presets)
+- [x] LocationsField with LocationSelectorModal
+- [x] NotificationSettings (Discord webhook)
+- [x] DeleteConfirmModal
+- [x] Full Zod validation
 
-**Deliverables** (Planned):
-- [ ] Discord webhook integration
-- [ ] Alert rules engine (down, latency spike, cert expiration)
-- [ ] Quiet hours configuration
-- [ ] Alert history & acknowledgment
-- [ ] Slack/Telegram integration (Phase 05+)
-- [ ] PagerDuty integration (Phase 05+)
-- [ ] Database cleanup & retention policies
-- [ ] Export functionality (JSON/CSV)
+---
+
+### Phase 06: API Routes & Database Integration ✓ COMPLETE
+**Timeline**: Completed (2025-11-30)
+**Status**: ✓ DONE
+
+**Deliverables**:
+- [x] GET/POST /api/monitors (list, create)
+- [x] GET/PUT/DELETE /api/monitors/[id]
+- [x] POST /api/monitors/[id]/pause
+- [x] GET /api/measurements/[monitorId]
+- [x] +page.server.ts with real data
+- [x] Zod validation schemas
+- [x] Type-safe monitor service
+
+---
+
+### Phase 07: Real-Time Updates ✓ COMPLETE
+**Timeline**: Completed (2025-11-30)
+**Status**: ✓ DONE
+
+**Deliverables**:
+- [x] Server-Sent Events (/api/events)
+- [x] EventEmitter for server events
+- [x] Svelte 5 realtime store
+- [x] ConnectionStatus component
+- [x] Auto-reconnect with backoff
+- [x] Monitor state sync
+
+---
+
+### Phase 08: Alert System ✓ COMPLETE
+**Timeline**: Completed (2025-11-30)
+**Status**: ✓ DONE
+
+**Deliverables**:
+- [x] Alerts table in schema
+- [x] Discord webhook integration
+- [x] Alert rules (down detection)
+- [x] Alert acknowledgment API
+- [x] AlertBanner component
+- [x] NotificationSettings integration
 
 **Features**:
-- Configurable alert thresholds
-- Alert deduplication (don't spam)
-- Multi-channel alerts
-- Alert templates
-- Integration with external systems
+- Down detection alerts
+- Discord webhook delivery
+- Alert acknowledgment
+- Real-time alert banner
 
 ---
 
-### Phase 06: Public Status Page ⏳ IN PLANNING
-**Timeline**: 2-3 weeks (estimated)
-**Priority**: Medium
-**Status**: ○ PENDING
+### Phase 09: Public Status Page ✓ COMPLETE
+**Timeline**: Completed (2025-11-30)
+**Status**: ✓ DONE
 
-**Objectives**:
-1. Public status page mode
-2. Incident management
-3. Component-based status
-
-**Deliverables** (Planned):
-- [ ] Public status page route (/status)
-- [ ] Admin status page settings
-- [ ] Component grouping (e.g., "API", "Web", "Database")
-- [ ] Incident timeline display
-- [ ] Historical uptime stats
-- [ ] Custom branding
+**Deliverables**:
+- [x] /status public route
+- [x] StatusHeader (overall status)
+- [x] StatusItem (per monitor)
+- [x] UptimeGraph (90-day viz)
+- [x] "public" field in monitors
+- [x] Server-side data loading
 
 ---
 
-### Phase 07: Advanced Check Types ⏳ IN PLANNING
+### Phase 10: Advanced Check Types ⏳ IN PLANNING
 **Timeline**: 3-4 weeks (estimated)
 **Priority**: Medium
 **Status**: ○ PENDING
@@ -202,7 +231,7 @@ GeoProbe is progressing through phases to build a complete, self-hosted multi-lo
 
 ---
 
-### Phase 08: Performance & Scaling ⏳ IN PLANNING
+### Phase 11: Performance & Scaling ⏳ IN PLANNING
 **Timeline**: 4-6 weeks (estimated)
 **Priority**: Medium
 **Status**: ○ PENDING
@@ -222,7 +251,7 @@ GeoProbe is progressing through phases to build a complete, self-hosted multi-lo
 
 ---
 
-### Phase 09: Mobile App ⏳ IN PLANNING
+### Phase 12: Mobile App ⏳ IN PLANNING
 **Timeline**: 6-8 weeks (estimated)
 **Priority**: Low
 **Status**: ○ PENDING
@@ -240,7 +269,7 @@ GeoProbe is progressing through phases to build a complete, self-hosted multi-lo
 
 ---
 
-### Phase 10: Community & Ecosystem ⏳ IN PLANNING
+### Phase 13: Community & Ecosystem ⏳ IN PLANNING
 **Timeline**: 4-6 weeks (estimated)
 **Priority**: Low
 **Status**: ○ PENDING
@@ -264,113 +293,89 @@ GeoProbe is progressing through phases to build a complete, self-hosted multi-lo
 
 ```
 2025-11
-├─ Nov 30: Phase 03 ✓ Core Dashboard Complete
-├─ Dec 7: Phase 04 ⏳ Metrics & Real-Time (Start)
+├─ Nov 30: Phase 01-09 ✓ All Core Features Complete
+│   ├─ Design & Planning
+│   ├─ Database Schema
+│   ├─ Core Dashboard
+│   ├─ Metrics & Visualization
+│   ├─ Monitor Config Form
+│   ├─ API Routes & CRUD
+│   ├─ Real-time Updates (SSE)
+│   ├─ Alert System (Discord)
+│   └─ Public Status Page
 │
-2025-12
-├─ Dec 21: Phase 04 ✓ Metrics & Real-Time Complete
-├─ Dec 28: Phase 05 ⏳ Alert System (Start)
-│
-2026-01
-├─ Jan 25: Phase 05 ✓ Alert System Complete
-├─ Feb 1: Phase 06 ⏳ Status Page (Start)
-│
-2026-02
-├─ Feb 21: Phase 06 ✓ Status Page Complete
-├─ Feb 28: Phase 07 ⏳ Advanced Checks (Start)
-│
-2026-03
-├─ Mar 28: Phase 07 ✓ Advanced Checks Complete
-├─ Apr 4: Phase 08 ⏳ Performance & Scaling (Start)
-│
-2026-05
-├─ May 30: Phase 08 ✓ Performance Complete
-├─ Jun 6: Phase 09 ⏳ Mobile App (Start)
-│
-2026-08
-├─ Aug 30: Phase 09 ✓ Mobile App Complete
-├─ Sep 6: Phase 10 ⏳ Community & Ecosystem (Start)
-│
-2026-11
-└─ Nov 30: Phase 10 ✓ Full Release Complete
+2025-12+
+├─ Phase 10 ⏳ Advanced Check Types
+├─ Phase 11 ⏳ Performance & Scaling
+├─ Phase 12 ⏳ Mobile App
+└─ Phase 13 ⏳ Community & Ecosystem
 ```
 
 ## Dependency Map
 
 ```
-Phase 01: Design & Planning
-├─> Phase 02: Database Schema
+Phase 01: Design & Planning ✓
+├─> Phase 02: Database Schema ✓
     ├─> Phase 03: Core Dashboard ✓
-        ├─> Phase 04: Metrics & Real-Time ⏳
-        │   ├─> Phase 05: Alert System ⏳
-        │   │   └─> Phase 06: Status Page ⏳
-        │   │
-        │   ├─> Phase 07: Advanced Checks ⏳
-        │   │
-        │   └─> Phase 08: Performance ⏳
-        │       └─> Phase 09: Mobile App ⏳
-        │
-        └─> Phase 10: Community & Ecosystem ⏳
+        ├─> Phase 04: Metrics & Visualization ✓
+            ├─> Phase 05: Monitor Config Form ✓
+                ├─> Phase 06: API Routes & CRUD ✓
+                    ├─> Phase 07: Real-time Updates ✓
+                        ├─> Phase 08: Alert System ✓
+                            └─> Phase 09: Status Page ✓
+                                │
+                                ├─> Phase 10: Advanced Checks ⏳
+                                ├─> Phase 11: Performance ⏳
+                                ├─> Phase 12: Mobile App ⏳
+                                └─> Phase 13: Community ⏳
 ```
 
 ## Success Metrics
 
-### Phase 03 (Current)
+### Phases 01-09 (Complete)
 | Metric | Target | Status |
 |--------|--------|--------|
-| Components Created | 5 | ✓ 5/5 |
-| Type Coverage | 100% | ✓ 100% |
-| Line Coverage | 60%+ | ○ Pending tests |
-| Design Fidelity | 95%+ | ✓ 95%+ |
-| Documentation | Complete | ✓ 5 docs created |
+| Components Created | 30+ | ✓ Complete |
+| Type Coverage | 100% | ✓ 100% (no `any`) |
+| API Endpoints | 7 | ✓ All CRUD + events |
+| Real-time | SSE | ✓ Implemented |
+| Alert System | Discord | ✓ Webhooks working |
+| Status Page | /status | ✓ Public route |
 
-### Phase 04 (Planned)
+### Phase 10+ (Planned)
 | Metric | Target | Notes |
 |--------|--------|-------|
-| Metrics Components | 3+ | Response chart, latency table, etc |
-| Real-time Latency | < 1s | WebSocket or polling |
-| CRUD Operations | 100% | Create/Read/Update/Delete |
-| Test Coverage | 70%+ | Critical paths tested |
-| Performance | < 2s load | SSR + cache optimization |
-
-### Phase 05 (Planned)
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Alert Channels | 3+ | Discord, Slack, Telegram |
-| False Positive Rate | < 2% | Intelligent alerting |
-| Alert Delivery | < 30s | Near real-time |
-| User Satisfaction | 4.5/5 | Community feedback |
+| Check Types | 4+ | TCP, Ping, DNS, SSL |
+| Performance | < 2s load | SSR + caching |
+| Mobile App | iOS/Android | React Native |
 
 ## Risk Assessment
 
 | Phase | Risk | Impact | Mitigation |
 |-------|------|--------|-----------|
-| 04 | Real-time complexity | High | Start with polling, upgrade to WebSocket |
-| 05 | Alert spam | High | Deduplication, quiet hours |
-| 06 | Public exposure | Medium | Authentication/rate limiting |
-| 07 | API compatibility | Medium | Support multiple check types separately |
-| 08 | Scaling challenges | High | PostgreSQL support, load testing |
+| 10 | API compatibility | Medium | Check types as plugins |
+| 11 | Scaling challenges | High | PostgreSQL support |
+| 12 | Mobile complexity | Medium | Start with web PWA |
+| 13 | Community adoption | Low | Strong documentation |
 
 ## Resource Requirements
 
 ### Team
-- **Phase 03**: 1 developer, 1 week ✓ COMPLETE
-- **Phase 04**: 1 developer, 2-3 weeks (estimated)
-- **Phase 05+**: 1-2 developers per phase
+- **Phase 01-09**: 1 developer ✓ COMPLETE
+- **Phase 10+**: 1-2 developers per phase
 
 ### Infrastructure
 - Development: Local machine (SQLite)
 - Testing: Docker containers
-- CI/CD: GitHub Actions (Phase 05+)
+- CI/CD: GitHub Actions
 - Monitoring: Project-managed (dogfooding)
 
 ## Known Limitations (Current)
 
-- Single-user, single-instance (multi-user in Phase 05+)
-- Scheduler not coordinated (duplicate checks if restarted)
-- No real-time updates (polling only, WebSocket in Phase 04)
-- No alerting (Discord integration in Phase 05)
-- No mobile app (React Native in Phase 09)
+- Single-user, single-instance
+- Scheduler not coordinated across instances
+- HTTP checks only (TCP/Ping/DNS in Phase 10)
+- No mobile app (Phase 12)
 
 ## Backward Compatibility
 
@@ -382,25 +387,21 @@ Phase 01: Design & Planning
 ## Community Contributions
 
 **Opportunities for Contributors**:
-- [ ] Phase 04: Chart library integration
-- [ ] Phase 05: Slack/Telegram integrations
-- [ ] Phase 06: Custom CSS for status page
-- [ ] Phase 07: TCP/DNS check implementations
-- [ ] Phase 09: React Native component library
-- [ ] Phase 10: Plugin development
+- [ ] Slack/Telegram integrations
+- [ ] Custom CSS for status page
+- [ ] TCP/DNS/Ping check implementations
+- [ ] React Native component library
+- [ ] Plugin development
 
 ## Documentation Roadmap
 
 | Phase | Documentation | Status |
 |-------|---------------|--------|
-| 03 | Codebase summary, Architecture, Standards, PDR | ✓ Complete |
-| 04 | API documentation, Migration guide | ○ Pending |
-| 05 | Alert configuration guide, Integration docs | ○ Pending |
-| 06 | Status page customization guide | ○ Pending |
-| 07 | Check type documentation | ○ Pending |
-| 08 | Scaling & deployment guide | ○ Pending |
-| 09 | Mobile app setup guide | ○ Pending |
-| 10 | Plugin development guide | ○ Pending |
+| 01-09 | Codebase summary, Architecture, Standards, PDR | ✓ Complete |
+| 10 | Check type documentation | ○ Pending |
+| 11 | Scaling & deployment guide | ○ Pending |
+| 12 | Mobile app setup guide | ○ Pending |
+| 13 | Plugin development guide | ○ Pending |
 
 ## Review Schedule
 

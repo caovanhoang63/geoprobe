@@ -6,16 +6,25 @@
 	import MetricsGrid from '$lib/components/MetricsGrid.svelte';
 	import ResponseChart from '$lib/components/ResponseChart.svelte';
 	import LocationLegend from '$lib/components/LocationLegend.svelte';
+	import ConnectionStatus from '$lib/components/ConnectionStatus.svelte';
 	import { MonitorFormModal } from '$lib/components/MonitorForm';
 	import { LOCATION_COLORS } from '$lib/utils/chart-config';
+	import { createRealtimeStore } from '$lib/stores/realtime.svelte';
 	import type { MonitorFormData, MonitorEditData, MonitorFormMode } from '$lib/types/monitor-form';
 	import type { SelectedLocation } from '$lib/types/location';
+	import type { PageData } from './$types';
+
+	interface Props {
+		data: PageData;
+	}
+
+	const { data }: Props = $props();
 
 	interface Monitor {
 		id: string;
 		name: string;
 		url: string;
-		status: 'up' | 'down';
+		status: 'up' | 'down' | 'unknown';
 		uptimePercentage: number;
 		uptimeHistory: Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }>;
 		interval?: number;
@@ -70,65 +79,39 @@
 		return data;
 	}
 
-	const monitors: Monitor[] = [
-		{
-			id: '1',
-			name: 'Production API',
-			url: 'https://api.example.com',
-			status: 'up',
-			uptimePercentage: 100,
-			uptimeHistory: generateUptimeHistory(),
-			interval: 300,
-			locations: [],
-			discordWebhook: ''
-		},
-		{
-			id: '2',
-			name: 'Marketing Website',
-			url: 'https://example.com',
-			status: 'up',
-			uptimePercentage: 99,
-			uptimeHistory: generateUptimeHistory(),
-			interval: 300,
-			locations: [],
-			discordWebhook: ''
-		},
-		{
-			id: '3',
-			name: 'Customer Portal',
-			url: 'https://portal.example.com',
-			status: 'down',
-			uptimePercentage: 87,
-			uptimeHistory: generateUptimeHistory(),
-			interval: 120,
-			locations: [],
-			discordWebhook: ''
-		},
-		{
-			id: '4',
-			name: 'Documentation Site',
-			url: 'https://docs.example.com',
-			status: 'up',
-			uptimePercentage: 98,
-			uptimeHistory: generateUptimeHistory(),
-			interval: 600,
-			locations: [],
-			discordWebhook: ''
-		},
-		{
-			id: '5',
-			name: 'Status Page',
-			url: 'https://status.example.com',
-			status: 'up',
-			uptimePercentage: 100,
-			uptimeHistory: generateUptimeHistory(),
-			interval: 60,
-			locations: [],
-			discordWebhook: ''
-		}
-	];
+	const realtime = createRealtimeStore();
 
-	let selectedMonitorId = $state(monitors[0]?.id || '1');
+	const monitors = $derived(
+		data.monitors.map((m) => {
+			const realtimeUpdate = realtime.getMonitorUpdate(m.id);
+			return {
+				id: m.id,
+				name: m.name,
+				url: m.url,
+				status: (realtimeUpdate?.status ?? (m.latestStatus === 'unknown' ? 'down' : m.latestStatus)) as 'up' | 'down',
+				uptimePercentage: realtimeUpdate?.uptime24h ?? m.uptime24h,
+				uptimeHistory: generateUptimeHistory(),
+				interval: m.interval,
+				locations: JSON.parse(m.locations),
+				discordWebhook: ''
+			};
+		})
+	);
+
+	let selectedMonitorId = $state<string>('');
+
+	$effect(() => {
+		if (!selectedMonitorId && monitors.length > 0 && monitors[0]) {
+			selectedMonitorId = monitors[0].id;
+		}
+	});
+
+	$effect(() => {
+		realtime.connect();
+		return () => {
+			realtime.disconnect();
+		};
+	});
 	let chartTimeRange: TimeRange = $state('24h');
 	let chartLocations: LocationConfig[] = $state([
 		{ id: 'us-east', name: 'US East', color: LOCATION_COLORS[0], value: 142, enabled: true },
@@ -163,8 +146,24 @@
 		formModalOpen = true;
 	}
 
-	function handlePause(): void {
-		console.log('Pause monitor:', selectedMonitor?.id);
+	async function handlePause(): Promise<void> {
+		if (!selectedMonitor) return;
+
+		try {
+			const response = await fetch(`/api/monitors/${selectedMonitor.id}/pause`, {
+				method: 'POST'
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				console.error('Failed to pause monitor:', error);
+				return;
+			}
+
+			window.location.reload();
+		} catch (error) {
+			console.error('Error pausing monitor:', error);
+		}
 	}
 
 	function handleEdit(): void {
@@ -182,8 +181,28 @@
 		formModalOpen = true;
 	}
 
-	function handleDelete(): void {
-		console.log('Delete monitor:', selectedMonitor?.id);
+	async function handleDelete(): Promise<void> {
+		if (!selectedMonitor) return;
+
+		if (!confirm(`Are you sure you want to delete "${selectedMonitor.name}"?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/monitors/${selectedMonitor.id}`, {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				console.error('Failed to delete monitor:', error);
+				return;
+			}
+
+			window.location.reload();
+		} catch (error) {
+			console.error('Error deleting monitor:', error);
+		}
 	}
 
 	function handleFormClose(): void {
@@ -191,20 +210,66 @@
 		editMonitorData = undefined;
 	}
 
-	function handleFormSave(data: MonitorFormData): void {
-		if (formMode === 'create') {
-			console.log('Create monitor:', data);
-		} else {
-			console.log('Update monitor:', editMonitorData?.id, data);
+	async function handleFormSave(formData: MonitorFormData): Promise<void> {
+		try {
+			if (formMode === 'create') {
+				const response = await fetch('/api/monitors', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(formData)
+				});
+
+				if (!response.ok) {
+					const error = await response.json();
+					console.error('Failed to create monitor:', error);
+					return;
+				}
+			} else {
+				const response = await fetch(`/api/monitors/${editMonitorData?.id}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(formData)
+				});
+
+				if (!response.ok) {
+					const error = await response.json();
+					console.error('Failed to update monitor:', error);
+					return;
+				}
+			}
+
+			formModalOpen = false;
+			editMonitorData = undefined;
+			window.location.reload();
+		} catch (error) {
+			console.error('Error saving monitor:', error);
 		}
-		formModalOpen = false;
-		editMonitorData = undefined;
 	}
 
-	function handleFormDelete(): void {
-		console.log('Delete monitor from form:', editMonitorData?.id);
-		formModalOpen = false;
-		editMonitorData = undefined;
+	async function handleFormDelete(): Promise<void> {
+		if (!editMonitorData?.id) return;
+
+		if (!confirm(`Are you sure you want to delete "${editMonitorData.name}"?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/monitors/${editMonitorData.id}`, {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				console.error('Failed to delete monitor:', error);
+				return;
+			}
+
+			formModalOpen = false;
+			editMonitorData = undefined;
+			window.location.reload();
+		} catch (error) {
+			console.error('Error deleting monitor:', error);
+		}
 	}
 
 	function handleTimeRangeChange(range: TimeRange): void {
@@ -231,9 +296,12 @@
 
 	<main class="ml-[280px] p-10">
 		<div class="max-w-7xl mx-auto">
-			<div class="mb-8">
-				<h1 class="text-4xl font-bold mb-2">{selectedMonitor?.name}</h1>
-				<p class="text-base text-[#9ca3af]">{selectedMonitor?.url}</p>
+			<div class="mb-8 flex items-start justify-between">
+				<div>
+					<h1 class="text-4xl font-bold mb-2">{selectedMonitor?.name}</h1>
+					<p class="text-base text-[#9ca3af]">{selectedMonitor?.url}</p>
+				</div>
+				<ConnectionStatus connected={realtime.connected} />
 			</div>
 
 			<div class="bg-[#242830] rounded-xl p-6 mb-8">

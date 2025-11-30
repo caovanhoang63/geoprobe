@@ -8,7 +8,9 @@ export const monitors = sqliteTable('monitors', {
 	url: text('url').notNull(),
 	interval: integer('interval').notNull().default(300),
 	locations: text('locations').notNull(),
+	discordWebhook: text('discord_webhook'),
 	active: integer('active', { mode: 'boolean' }).notNull().default(true),
+	public: integer('public', { mode: 'boolean' }).notNull().default(false),
 	createdAt: text('created_at')
 		.notNull()
 		.$defaultFn(() => new Date().toISOString()),
@@ -41,8 +43,28 @@ export const measurements = sqliteTable(
 	})
 );
 
+export const alerts = sqliteTable(
+	'alerts',
+	{
+		id: text('id').primaryKey().$defaultFn(() => uuid()),
+		monitorId: text('monitor_id')
+			.notNull()
+			.references(() => monitors.id, { onDelete: 'cascade' }),
+		type: text('type').notNull(),
+		message: text('message').notNull(),
+		acknowledged: integer('acknowledged', { mode: 'boolean' }).notNull().default(false),
+		createdAt: text('created_at')
+			.notNull()
+			.$defaultFn(() => new Date().toISOString())
+	},
+	(table) => ({
+		monitorIdCreatedAtIdx: index('monitor_id_created_at_idx').on(table.monitorId, table.createdAt)
+	})
+);
+
 export const monitorsRelations = relations(monitors, ({ many }) => ({
-	measurements: many(measurements)
+	measurements: many(measurements),
+	alerts: many(alerts)
 }));
 
 export const measurementsRelations = relations(measurements, ({ one }) => ({
@@ -52,7 +74,16 @@ export const measurementsRelations = relations(measurements, ({ one }) => ({
 	})
 }));
 
+export const alertsRelations = relations(alerts, ({ one }) => ({
+	monitor: one(monitors, {
+		fields: [alerts.monitorId],
+		references: [monitors.id]
+	})
+}));
+
 export type Monitor = typeof monitors.$inferSelect;
 export type NewMonitor = typeof monitors.$inferInsert;
 export type Measurement = typeof measurements.$inferSelect;
 export type NewMeasurement = typeof measurements.$inferInsert;
+export type Alert = typeof alerts.$inferSelect;
+export type NewAlert = typeof alerts.$inferInsert;

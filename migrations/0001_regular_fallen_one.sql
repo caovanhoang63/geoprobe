@@ -1,0 +1,1 @@
+ALTER TABLE `monitors` ADD `public` integer DEFAULT false NOT NULL;
