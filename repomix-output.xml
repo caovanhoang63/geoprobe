@@ -1,0 +1,1838 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+migrations/
+  meta/
+    _journal.json
+    0000_snapshot.json
+  0000_breezy_captain_cross.sql
+scripts/
+  test-db.ts
+src/
+  lib/
+    assets/
+      favicon.svg
+    components/
+      ActionButtons.svelte
+      MonitorListItem.svelte
+      Sidebar.svelte
+      UptimeBars.svelte
+    server/
+      checker.ts
+      cron.ts
+      db.ts
+      globalping.ts
+      schema.ts
+    types/
+      globalping.ts
+    index.ts
+  routes/
+    api/
+      test-check/
+        +server.ts
+    +layout.svelte
+    +page.svelte
+  app.css
+  app.d.ts
+  app.html
+static/
+  robots.txt
+.env.example
+.gitignore
+.npmrc
+.pnpmfile.cjs
+.repomixignore
+CLAUDE.md
+DESIGN_SUMMARY.md
+drizzle.config.ts
+package.json
+pnpm-workspace.yaml
+postcss.config.js
+README.md
+svelte.config.js
+tailwind.config.ts
+tsconfig.json
+vite.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/lib/components/ActionButtons.svelte">
+<script lang="ts">
+	interface Props {
+		onPause: () => void;
+		onEdit: () => void;
+		onDelete: () => void;
+	}
+
+	const { onPause, onEdit, onDelete }: Props = $props();
+</script>
+
+<div class="flex gap-3">
+	<button
+		onclick={onPause}
+		class="px-4 py-2 text-sm font-medium text-[#9ca3af] bg-transparent border border-[#3a3f4a] rounded-md flex items-center gap-1.5 transition-all duration-150 hover:bg-[#2a2f38] hover:border-[#4a5160] hover:text-[#e8eaed]"
+	>
+		<span>⏸</span>
+		<span>Pause</span>
+	</button>
+
+	<button
+		onclick={onEdit}
+		class="px-4 py-2 text-sm font-medium text-[#9ca3af] bg-transparent border border-[#3a3f4a] rounded-md flex items-center gap-1.5 transition-all duration-150 hover:bg-[#2a2f38] hover:border-[#4a5160] hover:text-[#e8eaed]"
+	>
+		<span>✏</span>
+		<span>Edit</span>
+	</button>
+
+	<button
+		onclick={onDelete}
+		class="px-4 py-2 text-sm font-medium text-white bg-[#ef4444] rounded-md flex items-center gap-1.5 transition-all duration-150 hover:bg-[#dc2626] hover:shadow-[0_2px_8px_rgba(239,68,68,0.3)]"
+	>
+		<span>🗑</span>
+		<span>Delete</span>
+	</button>
+</div>
+</file>
+
+<file path="src/lib/components/MonitorListItem.svelte">
+<script lang="ts">
+	interface Monitor {
+		id: string;
+		name: string;
+		status: 'up' | 'down';
+		uptimePercentage: number;
+	}
+
+	interface Props {
+		monitor: Monitor;
+		active: boolean;
+		onclick: () => void;
+	}
+
+	const { monitor, active, onclick }: Props = $props();
+</script>
+
+<button
+	onclick={onclick}
+	class="w-full px-4 py-3 flex items-center gap-3 border-b border-[#2d3139] transition-all duration-150 hover:bg-[#2a2f38] {active
+		? 'bg-[#2a2f38] border-l-[3px] border-l-[#10b981]'
+		: ''}"
+>
+	<div
+		class="min-w-[48px] h-6 px-2.5 rounded-full flex items-center justify-center text-[11px] font-semibold text-white {monitor.status ===
+		'up'
+			? 'bg-[#10b981]'
+			: 'bg-[#ef4444]'}"
+	>
+		{monitor.status === 'up' ? 'Up' : 'Down'} {monitor.uptimePercentage}%
+	</div>
+	<span class="flex-1 text-left text-sm text-[#e8eaed] truncate">{monitor.name}</span>
+</button>
+</file>
+
+<file path="src/lib/components/Sidebar.svelte">
+<script lang="ts">
+	import { type Snippet } from 'svelte';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	const { children }: Props = $props();
+</script>
+
+<div class="fixed left-0 top-0 h-screen w-[280px] bg-[#1e2228] border-r border-[#2d3139] overflow-y-auto flex flex-col">
+	<div class="h-16 px-5 flex items-center gap-3 border-b border-[#2d3139]">
+		<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#10b981] to-[#059669]"></div>
+		<span class="text-xl font-bold text-[#e8eaed]">GeoProbe</span>
+	</div>
+
+	<button
+		class="mx-4 mt-4 px-5 py-3 bg-[#10b981] text-white text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 hover:bg-[#0fd89e] hover:shadow-[0_4px_12px_rgba(16,185,129,0.3)]"
+	>
+		<span class="text-lg">+</span>
+		<span>Add New Monitor</span>
+	</button>
+
+	<div class="mx-4 mt-4 mb-4 relative">
+		<span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#6b7280] text-base">🔍</span>
+		<input
+			type="text"
+			placeholder="Search monitors..."
+			class="w-full pl-10 pr-4 py-2.5 bg-[#2a2f38] border border-[#363b45] rounded-lg text-[#e8eaed] text-sm placeholder-[#6b7280] transition-all duration-150 focus:outline-none focus:border-[#10b981] focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
+		/>
+	</div>
+
+	<div class="flex-1">
+		{@render children?.()}
+	</div>
+</div>
+</file>
+
+<file path="src/lib/components/UptimeBars.svelte">
+<script lang="ts">
+	interface UptimeData {
+		status: 'up' | 'down' | 'unknown';
+		timestamp: number;
+	}
+
+	interface Props {
+		uptimeData: UptimeData[];
+	}
+
+	const { uptimeData }: Props = $props();
+
+	function formatTimestamp(timestamp: number): string {
+		const date = new Date(timestamp);
+		const month = date.toLocaleDateString('en-US', { month: 'short' });
+		const day = date.getDate();
+		const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+		return `${month} ${day}, ${time}`;
+	}
+</script>
+
+<div class="flex gap-1 items-end h-10">
+	{#each uptimeData as data, i (i)}
+		<div
+			class="relative w-3 h-full rounded cursor-pointer transition-all duration-200 hover:scale-y-110 group {data.status ===
+			'up'
+				? 'bg-[#10b981] hover:shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+				: data.status === 'down'
+					? 'bg-[#ef4444] hover:shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+					: 'bg-[#6b7280] hover:shadow-[0_0_8px_rgba(107,114,128,0.5)]'}"
+		>
+			<div
+				class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[#242830] border border-[#363b45] rounded-md text-[11px] text-[#e8eaed] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-10"
+			>
+				{formatTimestamp(data.timestamp)}
+			</div>
+		</div>
+	{/each}
+</div>
+</file>
+
+<file path="src/lib/server/checker.ts">
+import { db } from './db';
+import { measurements } from './schema';
+import { runMeasurement } from './globalping';
+import type { Monitor } from './schema';
+import type { LocationFilter } from '$lib/types/globalping';
+
+export async function checkMonitor(monitor: Monitor): Promise<void> {
+	const locations: LocationFilter[] = JSON.parse(monitor.locations);
+
+	console.log(`[Checker] Starting check for ${monitor.name} (${monitor.url})`);
+
+	const response = await runMeasurement({
+		type: 'http',
+		target: monitor.url,
+		locations,
+		options: { timeout: 10000 }
+	});
+
+	if (response.status === 'failed') {
+		console.error(`[Checker] Measurement failed for ${monitor.name}`);
+		return;
+	}
+
+	const results =
+		response.results?.map((r) => ({
+			monitorId: monitor.id,
+			location: `${r.probe.city}, ${r.probe.country}`,
+			country: r.probe.country,
+			city: r.probe.city,
+			networkType: r.probe.tags.includes('residential') ? 'residential' : 'datacenter',
+			statusCode: r.result.statusCode ?? null,
+			latency: r.result.timings?.total ?? 0,
+			status: r.result.status === 'finished' ? 'success' : 'failed',
+			errorMessage: r.result.rawError ?? null
+		})) ?? [];
+
+	if (results.length > 0) {
+		await db.insert(measurements).values(results);
+		console.log(`[Checker] Stored ${results.length} measurements for ${monitor.name}`);
+	}
+}
+</file>
+
+<file path="src/lib/server/cron.ts">
+import cron from 'node-cron';
+import { db } from './db';
+import { monitors } from './schema';
+import { eq } from 'drizzle-orm';
+import { checkMonitor } from './checker';
+
+let cronJob: cron.ScheduledTask | null = null;
+
+async function runAllChecks(): Promise<void> {
+	const startTime = Date.now();
+	console.log('[Cron] Starting monitor checks...');
+
+	try {
+		const activeMonitors = await db.select().from(monitors).where(eq(monitors.active, true));
+
+		console.log(`[Cron] Found ${activeMonitors.length} active monitors`);
+
+		let successCount = 0;
+		let errorCount = 0;
+
+		for (const monitor of activeMonitors) {
+			try {
+				await checkMonitor(monitor);
+				successCount++;
+			} catch (error) {
+				errorCount++;
+				console.error(`[Cron] Failed to check ${monitor.name}:`, error);
+			}
+		}
+
+		const duration = Date.now() - startTime;
+		console.log(
+			`[Cron] Completed in ${duration}ms - Success: ${successCount}, Errors: ${errorCount}`
+		);
+	} catch (error) {
+		console.error('[Cron] Fatal error in runAllChecks:', error);
+	}
+}
+
+export function initializeCron(): void {
+	if (cronJob) {
+		console.log('[Cron] Already initialized, skipping...');
+		return;
+	}
+
+	cronJob = cron.schedule('*/5 * * * *', runAllChecks);
+
+	console.log('[Cron] Scheduler initialized - checks every 5 minutes');
+}
+
+export function stopCron(): void {
+	if (cronJob) {
+		cronJob.stop();
+		cronJob = null;
+		console.log('[Cron] Scheduler stopped');
+	}
+}
+</file>
+
+<file path="src/lib/server/globalping.ts">
+import type { GlobalpingRequest, GlobalpingResponse } from '$lib/types/globalping';
+
+const API_BASE = 'https://api.globalping.io/v1';
+
+export async function createMeasurement(request: GlobalpingRequest): Promise<string> {
+	const response = await fetch(`${API_BASE}/measurements`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(request)
+	});
+
+	if (!response.ok) {
+		throw new Error(`Globalping API error: ${response.status} ${await response.text()}`);
+	}
+
+	const data = (await response.json()) as GlobalpingResponse;
+	console.log(`[Globalping] Created measurement: ${data.id}`);
+	return data.id;
+}
+
+export async function pollMeasurement(id: string): Promise<GlobalpingResponse> {
+	let delay = 1000;
+	const maxDelay = 5000;
+	const maxAttempts = 20;
+
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		await new Promise((resolve) => setTimeout(resolve, delay));
+
+		const response = await fetch(`${API_BASE}/measurements/${id}`);
+		if (!response.ok) {
+			throw new Error(`Poll failed: ${response.status}`);
+		}
+
+		const data = (await response.json()) as GlobalpingResponse;
+
+		if (data.status !== 'in-progress') {
+			console.log(`[Globalping] Measurement ${id} completed after ${attempt + 1} polls`);
+			return data;
+		}
+
+		delay = Math.min(delay * 1.5, maxDelay);
+	}
+
+	throw new Error(`Measurement ${id} timed out after ${maxAttempts} polls`);
+}
+
+export async function runMeasurement(request: GlobalpingRequest): Promise<GlobalpingResponse> {
+	const id = await createMeasurement(request);
+	return await pollMeasurement(id);
+}
+</file>
+
+<file path="src/lib/types/globalping.ts">
+export interface LocationFilter {
+	country?: string;
+	continent?: string;
+	city?: string;
+	tags?: string[];
+}
+
+export interface GlobalpingRequest {
+	type: 'http';
+	target: string;
+	locations: LocationFilter[];
+	options?: {
+		timeout?: number;
+	};
+}
+
+export interface GlobalpingResponse {
+	id: string;
+	status: 'in-progress' | 'completed' | 'failed';
+	type: string;
+	target: string;
+	results?: ProbeResult[];
+}
+
+export interface ProbeResult {
+	probe: {
+		country: string;
+		city: string;
+		continent: string;
+		tags: string[];
+	};
+	result: {
+		status: 'finished' | 'failed';
+		statusCode?: number;
+		timings?: {
+			total: number;
+			firstByte: number;
+			download: number;
+		};
+		rawError?: string;
+	};
+}
+</file>
+
+<file path="src/routes/api/test-check/+server.ts">
+import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
+import { db } from '$lib/server/db';
+import { monitors } from '$lib/server/schema';
+import { checkMonitor } from '$lib/server/checker';
+
+export const POST: RequestHandler = async () => {
+	const [monitor] = await db.select().from(monitors).limit(1);
+
+	if (!monitor) {
+		return json({ error: 'No monitors found' }, { status: 404 });
+	}
+
+	try {
+		await checkMonitor(monitor);
+		return json({ success: true, monitorId: monitor.id });
+	} catch (error) {
+		console.error('[API] Test check failed:', error);
+		return json(
+			{ error: error instanceof Error ? error.message : 'Unknown error' },
+			{ status: 500 }
+		);
+	}
+};
+</file>
+
+<file path="migrations/meta/_journal.json">
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1764450671339,
+      "tag": "0000_breezy_captain_cross",
+      "breakpoints": true
+    }
+  ]
+}
+</file>
+
+<file path="migrations/meta/0000_snapshot.json">
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "079fc30c-06ae-4fe8-bb3c-d2c32ad5eb80",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "measurements": {
+      "name": "measurements",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "monitor_id": {
+          "name": "monitor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "country": {
+          "name": "country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "city": {
+          "name": "city",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "network_type": {
+          "name": "network_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status_code": {
+          "name": "status_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "latency": {
+          "name": "latency",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "monitor_id_timestamp_idx": {
+          "name": "monitor_id_timestamp_idx",
+          "columns": [
+            "monitor_id",
+            "timestamp"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "measurements_monitor_id_monitors_id_fk": {
+          "name": "measurements_monitor_id_monitors_id_fk",
+          "tableFrom": "measurements",
+          "tableTo": "monitors",
+          "columnsFrom": [
+            "monitor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "monitors": {
+      "name": "monitors",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "interval": {
+          "name": "interval",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 300
+        },
+        "locations": {
+          "name": "locations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "active": {
+          "name": "active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
+</file>
+
+<file path="migrations/0000_breezy_captain_cross.sql">
+CREATE TABLE `measurements` (
+	`id` text PRIMARY KEY NOT NULL,
+	`monitor_id` text NOT NULL,
+	`location` text NOT NULL,
+	`country` text,
+	`city` text,
+	`network_type` text,
+	`status_code` integer,
+	`latency` real NOT NULL,
+	`status` text NOT NULL,
+	`error_message` text,
+	`timestamp` text NOT NULL,
+	FOREIGN KEY (`monitor_id`) REFERENCES `monitors`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `monitor_id_timestamp_idx` ON `measurements` (`monitor_id`,`timestamp`);--> statement-breakpoint
+CREATE TABLE `monitors` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`url` text NOT NULL,
+	`interval` integer DEFAULT 300 NOT NULL,
+	`locations` text NOT NULL,
+	`active` integer DEFAULT true NOT NULL,
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL
+);
+</file>
+
+<file path="scripts/test-db.ts">
+import { db } from '../src/lib/server/db';
+import { monitors } from '../src/lib/server/schema';
+
+async function testDatabase() {
+	try {
+		console.log('[Test] Inserting test monitor...');
+
+		const testMonitor = await db
+			.insert(monitors)
+			.values({
+				name: 'Test Monitor',
+				url: 'https://example.com',
+				interval: 300,
+				locations: JSON.stringify([{ country: 'US' }, { country: 'DE' }])
+			})
+			.returning();
+
+		console.log('[Test] Created monitor:', testMonitor);
+
+		console.log('[Test] Querying all monitors...');
+		const allMonitors = await db.select().from(monitors);
+		console.log('[Test] All monitors:', allMonitors);
+
+		console.log('[Test] Database test completed successfully!');
+	} catch (error) {
+		console.error('[Test] Database test failed:', error);
+		process.exit(1);
+	}
+}
+
+testDatabase();
+</file>
+
+<file path="src/lib/assets/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="107" height="128" viewBox="0 0 107 128"><title>svelte-logo</title><path d="M94.157 22.819c-10.4-14.885-30.94-19.297-45.792-9.835L22.282 29.608A29.92 29.92 0 0 0 8.764 49.65a31.5 31.5 0 0 0 3.108 20.231 30 30 0 0 0-4.477 11.183 31.9 31.9 0 0 0 5.448 24.116c10.402 14.887 30.942 19.297 45.791 9.835l26.083-16.624A29.92 29.92 0 0 0 98.235 78.35a31.53 31.53 0 0 0-3.105-20.232 30 30 0 0 0 4.474-11.182 31.88 31.88 0 0 0-5.447-24.116" style="fill:#ff3e00"/><path d="M45.817 106.582a20.72 20.72 0 0 1-22.237-8.243 19.17 19.17 0 0 1-3.277-14.503 18 18 0 0 1 .624-2.435l.49-1.498 1.337.981a33.6 33.6 0 0 0 10.203 5.098l.97.294-.09.968a5.85 5.85 0 0 0 1.052 3.878 6.24 6.24 0 0 0 6.695 2.485 5.8 5.8 0 0 0 1.603-.704L69.27 76.28a5.43 5.43 0 0 0 2.45-3.631 5.8 5.8 0 0 0-.987-4.371 6.24 6.24 0 0 0-6.698-2.487 5.7 5.7 0 0 0-1.6.704l-9.953 6.345a19 19 0 0 1-5.296 2.326 20.72 20.72 0 0 1-22.237-8.243 19.17 19.17 0 0 1-3.277-14.502 17.99 17.99 0 0 1 8.13-12.052l26.081-16.623a19 19 0 0 1 5.3-2.329 20.72 20.72 0 0 1 22.237 8.243 19.17 19.17 0 0 1 3.277 14.503 18 18 0 0 1-.624 2.435l-.49 1.498-1.337-.98a33.6 33.6 0 0 0-10.203-5.1l-.97-.294.09-.968a5.86 5.86 0 0 0-1.052-3.878 6.24 6.24 0 0 0-6.696-2.485 5.8 5.8 0 0 0-1.602.704L37.73 51.72a5.42 5.42 0 0 0-2.449 3.63 5.79 5.79 0 0 0 .986 4.372 6.24 6.24 0 0 0 6.698 2.486 5.8 5.8 0 0 0 1.602-.704l9.952-6.342a19 19 0 0 1 5.295-2.328 20.72 20.72 0 0 1 22.237 8.242 19.17 19.17 0 0 1 3.277 14.503 18 18 0 0 1-8.13 12.053l-26.081 16.622a19 19 0 0 1-5.3 2.328" style="fill:#fff"/></svg>
+</file>
+
+<file path="src/lib/server/db.ts">
+import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import * as schema from './schema';
+
+const DATABASE_URL = process.env.DATABASE_URL || 'file:./data.db';
+
+const sqlite = new Database(DATABASE_URL.replace('file:', ''));
+sqlite.pragma('journal_mode = WAL');
+sqlite.pragma('foreign_keys = ON');
+
+export const db = drizzle(sqlite, { schema });
+
+try {
+	migrate(db, { migrationsFolder: './migrations' });
+	console.log('[Database] Initialized with WAL mode and foreign keys enabled');
+} catch (error) {
+	console.error('[Database] Migration failed:', error);
+	throw error;
+}
+</file>
+
+<file path="src/lib/server/schema.ts">
+import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
+import { v4 as uuid } from 'uuid';
+
+export const monitors = sqliteTable('monitors', {
+	id: text('id').primaryKey().$defaultFn(() => uuid()),
+	name: text('name').notNull(),
+	url: text('url').notNull(),
+	interval: integer('interval').notNull().default(300),
+	locations: text('locations').notNull(),
+	active: integer('active', { mode: 'boolean' }).notNull().default(true),
+	createdAt: text('created_at')
+		.notNull()
+		.$defaultFn(() => new Date().toISOString()),
+	updatedAt: text('updated_at')
+		.notNull()
+		.$defaultFn(() => new Date().toISOString())
+});
+
+export const measurements = sqliteTable(
+	'measurements',
+	{
+		id: text('id').primaryKey().$defaultFn(() => uuid()),
+		monitorId: text('monitor_id')
+			.notNull()
+			.references(() => monitors.id, { onDelete: 'cascade' }),
+		location: text('location').notNull(),
+		country: text('country'),
+		city: text('city'),
+		networkType: text('network_type'),
+		statusCode: integer('status_code'),
+		latency: real('latency').notNull(),
+		status: text('status').notNull(),
+		errorMessage: text('error_message'),
+		timestamp: text('timestamp')
+			.notNull()
+			.$defaultFn(() => new Date().toISOString())
+	},
+	(table) => ({
+		monitorIdTimestampIdx: index('monitor_id_timestamp_idx').on(table.monitorId, table.timestamp)
+	})
+);
+
+export const monitorsRelations = relations(monitors, ({ many }) => ({
+	measurements: many(measurements)
+}));
+
+export const measurementsRelations = relations(measurements, ({ one }) => ({
+	monitor: one(monitors, {
+		fields: [measurements.monitorId],
+		references: [monitors.id]
+	})
+}));
+
+export type Monitor = typeof monitors.$inferSelect;
+export type NewMonitor = typeof monitors.$inferInsert;
+export type Measurement = typeof measurements.$inferSelect;
+export type NewMeasurement = typeof measurements.$inferInsert;
+</file>
+
+<file path="src/lib/index.ts">
+// place files you want to import through the `$lib` alias in this folder.
+</file>
+
+<file path="src/routes/+layout.svelte">
+<script lang="ts">
+	import '../app.css';
+	import favicon from '$lib/assets/favicon.svg';
+
+	let { children } = $props();
+</script>
+
+<svelte:head>
+	<link rel="icon" href={favicon} />
+</svelte:head>
+
+{@render children()}
+</file>
+
+<file path="src/routes/+page.svelte">
+<script lang="ts">
+	import Sidebar from '$lib/components/Sidebar.svelte';
+	import MonitorListItem from '$lib/components/MonitorListItem.svelte';
+	import UptimeBars from '$lib/components/UptimeBars.svelte';
+	import ActionButtons from '$lib/components/ActionButtons.svelte';
+
+	interface Monitor {
+		id: string;
+		name: string;
+		url: string;
+		status: 'up' | 'down';
+		uptimePercentage: number;
+		uptimeHistory: Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }>;
+	}
+
+	function generateUptimeHistory(): Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> {
+		const now = Date.now();
+		const history: Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> = [];
+		for (let i = 29; i >= 0; i--) {
+			const timestamp = now - i * 60 * 60 * 1000;
+			const random = Math.random();
+			const status: 'up' | 'down' | 'unknown' = random > 0.9 ? 'down' : random > 0.85 ? 'unknown' : 'up';
+			history.push({ status, timestamp });
+		}
+		return history;
+	}
+
+	const monitors: Monitor[] = [
+		{
+			id: '1',
+			name: 'Production API',
+			url: 'https://api.example.com',
+			status: 'up',
+			uptimePercentage: 100,
+			uptimeHistory: generateUptimeHistory()
+		},
+		{
+			id: '2',
+			name: 'Marketing Website',
+			url: 'https://example.com',
+			status: 'up',
+			uptimePercentage: 99,
+			uptimeHistory: generateUptimeHistory()
+		},
+		{
+			id: '3',
+			name: 'Customer Portal',
+			url: 'https://portal.example.com',
+			status: 'down',
+			uptimePercentage: 87,
+			uptimeHistory: generateUptimeHistory()
+		},
+		{
+			id: '4',
+			name: 'Documentation Site',
+			url: 'https://docs.example.com',
+			status: 'up',
+			uptimePercentage: 98,
+			uptimeHistory: generateUptimeHistory()
+		},
+		{
+			id: '5',
+			name: 'Status Page',
+			url: 'https://status.example.com',
+			status: 'up',
+			uptimePercentage: 100,
+			uptimeHistory: generateUptimeHistory()
+		}
+	];
+
+	let selectedMonitorId = $state(monitors[0]?.id || '1');
+
+	const selectedMonitor = $derived(monitors.find((m) => m.id === selectedMonitorId)!);
+
+	function handlePause() {
+		console.log('Pause monitor:', selectedMonitor?.id);
+	}
+
+	function handleEdit() {
+		console.log('Edit monitor:', selectedMonitor?.id);
+	}
+
+	function handleDelete() {
+		console.log('Delete monitor:', selectedMonitor?.id);
+	}
+</script>
+
+<div class="min-h-screen bg-[#1a1d21] text-[#e8eaed]">
+	<Sidebar>
+		{#each monitors as monitor}
+			<MonitorListItem
+				{monitor}
+				active={monitor.id === selectedMonitorId}
+				onclick={() => (selectedMonitorId = monitor.id)}
+			/>
+		{/each}
+	</Sidebar>
+
+	<main class="ml-[280px] p-10">
+		<div class="max-w-7xl mx-auto">
+			<div class="mb-8">
+				<h1 class="text-4xl font-bold mb-2">{selectedMonitor?.name}</h1>
+				<p class="text-base text-[#9ca3af]">{selectedMonitor?.url}</p>
+			</div>
+
+			<div class="bg-[#242830] rounded-xl p-6 mb-8">
+				<div class="flex items-center justify-between mb-6">
+					<div>
+						<h2 class="text-lg font-semibold mb-1">Uptime History (Last 30 Hours)</h2>
+						<p class="text-sm text-[#9ca3af]">
+							{selectedMonitor?.uptimePercentage}% uptime in the last 30 hours
+						</p>
+					</div>
+					<div
+						class="px-4 py-2 rounded-full text-sm font-semibold {selectedMonitor?.status === 'up'
+							? 'bg-[#10b981] text-white'
+							: 'bg-[#ef4444] text-white'}"
+					>
+						{selectedMonitor?.status === 'up' ? '✓ Up' : '✗ Down'}
+					</div>
+				</div>
+
+				{#if selectedMonitor}
+					<UptimeBars uptimeData={selectedMonitor.uptimeHistory} />
+				{/if}
+			</div>
+
+			<div class="bg-[#242830] rounded-xl p-6 mb-8">
+				<h2 class="text-lg font-semibold mb-4">Actions</h2>
+				<ActionButtons onPause={handlePause} onEdit={handleEdit} onDelete={handleDelete} />
+			</div>
+
+			<div class="bg-[#242830] rounded-xl p-6">
+				<h2 class="text-lg font-semibold mb-4">Metrics</h2>
+				<p class="text-sm text-[#9ca3af]">Response time charts and detailed metrics coming in Phase 04...</p>
+			</div>
+		</div>
+	</main>
+</div>
+</file>
+
+<file path="src/app.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+</file>
+
+<file path="src/app.d.ts">
+// See https://svelte.dev/docs/kit/types#app.d.ts
+// for information about these interfaces
+declare global {
+	namespace App {
+		// interface Error {}
+		// interface Locals {}
+		// interface PageData {}
+		// interface PageState {}
+		// interface Platform {}
+	}
+}
+
+export {};
+</file>
+
+<file path="src/app.html">
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover" data-theme="dark">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
+</file>
+
+<file path="static/robots.txt">
+# allow crawling everything by default
+User-agent: *
+Disallow:
+</file>
+
+<file path=".env.example">
+DATABASE_URL=file:./data.db
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE
+</file>
+
+<file path=".pnpmfile.cjs">
+function readPackage(pkg) {
+  return pkg
+}
+
+module.exports = {
+  hooks: {
+    readPackage
+  },
+  allowBuild: {
+    'better-sqlite3': true
+  }
+}
+</file>
+
+<file path=".repomixignore">
+docs/*
+plans/*
+assets/*
+dist/*
+coverage/*
+build/*
+ios/*
+android/*
+tests/*
+__tests__/*
+__pycache__/*
+node_modules/*
+
+.opencode/*
+.claude/*
+.serena/*
+.pnpm-store/*
+.github/*
+.dart_tool/*
+.idea/*
+.husky/*
+.venv/*
+</file>
+
+<file path="CLAUDE.md">
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Role & Responsibilities
+
+Your role is to analyze user requirements, delegate tasks to appropriate sub-agents, and ensure cohesive delivery of features that meet specifications and architectural standards.
+
+## Workflows
+
+- Primary workflow: `./.claude/workflows/primary-workflow.md`
+- Development rules: `./.claude/workflows/development-rules.md`
+- Orchestration protocols: `./.claude/workflows/orchestration-protocol.md`
+- Documentation management: `./.claude/workflows/documentation-management.md`
+- And other workflows: `./.claude/workflows/*`
+
+**IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
+**IMPORTANT:** You must follow strictly the development rules in `./.claude/workflows/development-rules.md` file.
+**IMPORTANT:** Before you plan or proceed any implementation, always read the `./README.md` file first to get context.
+**IMPORTANT:** Sacrifice grammar for the sake of concision when writing reports.
+**IMPORTANT:** In reports, list any unresolved questions at the end, if any.
+**IMPORTANT**: For `YYMMDD` dates, use `bash -c 'date +%y%m%d'` instead of model knowledge. Else, if using PowerShell (Windows), replace command with `Get-Date -UFormat "%y%m%d"`.
+
+## Documentation Management
+
+We keep all important docs in `./docs` folder and keep updating them, structure like below:
+
+```
+./docs
+├── project-overview-pdr.md
+├── code-standards.md
+├── codebase-summary.md
+├── design-guidelines.md
+├── deployment-guide.md
+├── system-architecture.md
+└── project-roadmap.md
+```
+
+**IMPORTANT:** *MUST READ* and *MUST COMPLY* all *INSTRUCTIONS* in project `./CLAUDE.md`, especially *WORKFLOWS* section is *CRITICALLY IMPORTANT*, this rule is *MANDATORY. NON-NEGOTIABLE. NO EXCEPTIONS. MUST REMEMBER AT ALL TIMES!!!*
+</file>
+
+<file path="DESIGN_SUMMARY.md">
+# GeoProbe Multi-Location UI Design - Summary
+
+**Created**: 2025-11-30 02:46
+**Status**: ✅ Design Complete, Ready for Review
+
+## Overview
+
+Designed comprehensive UI for GeoProbe multi-location uptime monitor inspired by Uptime Kuma with enhanced geographic monitoring capabilities.
+
+## Deliverables
+
+sign
+- **Files**:
+  - `plan.md` - Project overview with phase links
+  - `phase-01-design-analysis.md` - Uptime Kuma screenshot analysis
+  - `phase-02-location-selector.md` - Multi-location component specs
+  - `phase-03-dashboard-core.md` - Main dashboard layout specs
+  - `phase-04-metrics-visualization.md` - Charts and metrics specs
+
+### 2. Working Prototype
+- **File**: `prototype-dashboard.html`
+- **Features**:
+  - ✅ Full dark theme matching Uptime Kuma aesthetic
+  - ✅ Sidebar with monitor list and status badges
+  - ✅ Uptime visualization bars (30 segments)
+  - ✅ Metrics grid (Response time, Uptime %, Cert expiration)
+  - ✅ Response time chart (SVG visualization)
+  - ✅ Multi-location selector modal
+  - ✅ Location badges with network indicators
+  - ✅ Smooth animations (150-300ms transitions)
+  - ✅ Responsive grid layouts
+
+**To view**: Open `prototype-dashboard.html` in browser
+
+### 3. Design System Documentation
+- **File**: `docs/design-guidelines.md`
+- **Sections**:
+  - Color system (dark theme backgrounds, status colors)
+  - Typography (Inter font, type scale, weights)
+  - Spacing system (4px base unit)
+  - Component specs (buttons, badges, cards, inputs)
+  - Layout patterns (sidebar, grids)
+  - Micro-interactions (timing, easing curves)
+  - Accessibility standards (WCAG AA contrast)
+  - Multi-location features (modal, badges, chart colors)
+
+## Key Design Decisions
+
+### Color Palette (Tailwind-Inspired)
+```
+Backgrounds: #1a1d21 → #363b45 (7-layer progression)
+Success:     #10b981 (Emerald-500)
+Error:       #ef4444 (Red-500)
+Info:        #3b82f6 (Blue-500)
+Warning:     #f59e0b (Amber-500)
+```
+
+### Typography
+- **Font**: Inter (primary), fallback to system sans-serif
+- **Base size**: 14px
+- **Scale**: 11px (badges) → 36px (page titles)
+- **Weights**: 400 (regular), 500 (medium), 600 (semi-bold), 700 (bold)
+
+### Multi-Location Differentiation
+1. **Location Selector Modal**: Continent grid → country/city drill-down
+2. **Network Indicators**: Green dot (residential), Blue dot (datacenter)
+3. **Location Badges**: Removable chips showing selected locations
+4. **Multi-Line Charts**: Up to 6 locations with distinct colors
+
+### Component Highlights
+
+**Uptime Bars**:
+- 30 vertical bars (12px × 40px each)
+- 4px gap between bars
+- Green (up) / Red (down) colors
+- Hover: scale + glow effect
+- Tooltip on hover
+
+**Status Badges**:
+- Pill shape (border-radius: 12px)
+- Font: 11px, weight 600
+- Padding: 4px 10px
+- Colors: Green (100%), Red (0%)
+
+**Buttons**:
+- Primary: Green, 8px radius, 150ms hover
+- Secondary: Ghost style, 6px radius
+- Danger: Red, subtle shadow
+
+## Technical Specifications
+
+### Layout
+```
+┌──────────┬────────────────────────────────┐
+│          │  Monitor Detail (Title, URL)   │
+│ Sidebar  ├────────────────────────────────┤
+│          │  Uptime Bars + Status          │
+│  280px   ├────────────────────────────────┤
+│  Fixed   │  Metrics (5-column grid)       │
+│          ├────────────────────────────────┤
+│          │  Response Time Chart           │
+└──────────┴────────────────────────────────┘
+```
+
+### Responsive Breakpoints
+- **1400px**: Metrics grid → 3 columns
+- **1024px**: Metrics grid → 2 columns
+- **768px**: Sidebar collapses (future enhancement)
+
+### Accessibility
+- Primary text: 14:1 contrast (AAA)
+- Secondary text: 7:1 contrast (AAA large)
+- Focus indicators: 3px emerald ring
+- Keyboard navigation: Tab, Enter, Escape, Arrow keys
+
+## Implementation Notes
+
+### Prototype → SvelteKit Migration
+1. Convert HTML structure to `.svelte` components:
+   - `Sidebar.svelte`
+   - `MonitorList.svelte`
+   - `UptimeBars.svelte`
+   - `MetricsGrid.svelte`
+   - `ResponseChart.svelte`
+   - `LocationSelector.svelte`
+
+2. Replace inline styles with Tailwind classes:
+   - Create `tailwind.config.ts` with custom theme
+   - Use `@apply` for component patterns
+   - Maintain exact color/spacing values
+
+3. Add state management:
+   - Svelte stores for monitor data
+   - Reactive statements for uptime calculations
+   - API integration with Globalping
+
+4. Enhance with Svelte features:
+   - Transitions (fade, slide, scale)
+   - Animations (tweened values for metrics)
+   - Reactive charts (update on data change)
+
+### Chart Library Recommendation
+Use **Chart.js** or **Apache ECharts** for response time visualization:
+- Both support dark themes
+- Smooth animations
+- Multi-line datasets (for location comparison)
+- Responsive/accessible
+- Lightweight
+
+### Location Data Structure
+```typescript
+interface Location {
+  id: string
+  continent: string
+  country: string
+  city: string
+  networkType: 'residential' | 'datacenter'
+  isp?: string
+}
+
+interface SelectedLocation {
+  location: Location
+  color: string  // Assigned from palette
+}
+```
+
+## Next Steps for Development
+
+1. **Integrate with Globalping API**:
+   - Fetch available probe locations
+   - Map to continent/country/city structure
+   - Filter by network type
+
+2. **Implement SvelteKit Routes**:
+   - `/` - Dashboard (monitor list)
+   - `/monitor/[id]` - Monitor detail view
+   - `/monitor/new` - Create monitor form
+   - `/monitor/[id]/edit` - Edit monitor
+
+3. **Add Real-Time Updates**:
+   - WebSocket or polling for live status
+   - Smooth chart updates (500ms transition)
+   - Toast notifications for status changes
+
+4. **Database Integration**:
+   - Store monitor configurations (SQLite via Drizzle)
+   - Save historical response times
+   - Track uptime percentage calculations
+
+5. **Testing**:
+   - Visual regression tests (screenshot comparison)
+   - Accessibility audit (axe-core)
+   - Performance testing (Lighthouse)
+   - Cross-browser compatibility
+
+## Files Structure
+
+```
+globalping-ui/
+├── prototype-dashboard.html          # Standalone HTML prototype
+├── plans/
+│   └── 20251130-0246-geoprobe-multi-location-ui/
+│       ├── plan.md                   # Overview
+│       ├── phase-01-design-analysis.md
+│       ├── phase-02-location-selector.md
+│       ├── phase-03-dashboard-core.md
+│       └── phase-04-metrics-visualization.md
+├── docs/
+│   ├── design-guidelines.md          # Complete design system
+│   └── image/
+│       └── img.png                   # Uptime Kuma reference
+└── DESIGN_SUMMARY.md                 # This file
+```
+
+## Review Checklist
+
+Before proceeding to implementation:
+
+- [x] Design matches Uptime Kuma aesthetic quality
+- [x] Multi-location features clearly differentiated
+- [x] Color palette follows Tailwind conventions
+- [x] Typography system is consistent
+- [x] Spacing uses 4px increments
+- [x] All components have hover states
+- [x] Accessibility standards met (WCAG AA)
+- [x] Responsive breakpoints defined
+- [x] Micro-interactions documented (timing, easing)
+- [x] Implementation path clear (Svelte components)
+
+## Questions?
+
+Review detailed specifications in:
+- **Design System**: `docs/design-guidelines.md`
+- **Implementation Plans**: `plans/20251130-0246-geoprobe-multi-location-ui/*.md`
+- **Working Prototype**: `prototype-dashboard.html`
+
+---
+
+**Design Status**: ✅ Complete and Ready for Implementation
+**Estimated Implementation Time**: 2-3 development sprints
+**Priority**: High (Core product differentiator)
+</file>
+
+<file path="drizzle.config.ts">
+import type { Config } from 'drizzle-kit';
+
+export default {
+	schema: './src/lib/server/schema.ts',
+	out: './migrations',
+	dialect: 'sqlite',
+	dbCredentials: {
+		url: process.env.DATABASE_URL || 'file:./data.db'
+	}
+} satisfies Config;
+</file>
+
+<file path="pnpm-workspace.yaml">
+ignoredBuiltDependencies:
+  - better-sqlite3
+</file>
+
+<file path="postcss.config.js">
+export default {
+	plugins: {
+		tailwindcss: {},
+		autoprefixer: {}
+	}
+};
+</file>
+
+<file path="README.md">
+# 🌍 GeoProbe
+
+> **A self-hosted, multi-location uptime monitor built with SvelteKit, SQLite, and the Globalping Network.**
+
+
+
+## 📖 Introduction
+
+**GeoProbe** is an advanced uptime monitoring solution that solves the "location bias" problem. Unlike traditional monitors that check your website from a single server, GeoProbe leverages the [Globalping REST API](https://globalping.io/) to dispatch probes to residential and datacenter networks worldwide.
+
+It combines the performance of **SvelteKit (SSR)** with the simplicity of **SQLite**, giving you a robust, self-hosted monitoring tool without the complexity of microservices.
+
+## ✨ Key Features
+
+* **🌐 Multi-Location Monitoring:** Check HTTP/HTTPS latency from specific regions (e.g., "Check `google.com` from Vietnam, Germany, and USA").
+* **⏰ Customizable Intervals:** Configure check frequencies per monitor (e.g., critical services every 2 minutes, blogs every hour).
+* **🚨 Multi-Channel Alerting:** Built-in integration for **Discord Webhooks**. Receive instant notifications when a site goes down or latency spikes.
+* **🏠 Residential Network Testing:** Detect if your site is blocked or throttled by specific ISPs (Last-mile monitoring).
+* **📂 Portable Database:** Powered by **Better-SQLite3** and **Drizzle ORM** for a lightweight, type-safe, and zero-config database experience.
+* **📊 Historical Data:** Visualize latency trends and uptime percentage over time.
+
+## 🛠️ Tech Stack
+* **Package manager**: pnpm
+* **Framework:** [SvelteKit](https://kit.svelte.dev/) (Node.js Adapter)
+* **Language:** TypeScript
+* **Database:** SQLite (via `better-sqlite3`)
+* **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
+* **Scheduler:** `node-cron`
+* **External API:** [Globalping REST API](https://globalping.io/docs/api.globalping.io)
+* **Styling:** TailwindCSS & Daisy UI
+
+## 📐 Architecture & Technical Details
+
+### 1\. The Asynchronous Polling Engine
+
+GeoProbe handles the asynchronous nature of the Globalping API efficiently to prevent rate-limiting while ensuring data accuracy:
+
+1.  **Initiation (`POST /v1/measurements`):** The system requests a check and receives a `measurementId`.
+2.  **Smart Polling (`GET /v1/measurements/{id}`):** Instead of spamming the API, GeoProbe implements a polling loop with a **1-second delay** backoff strategy.
+3.  **Completion:** The loop continues until the status returns `finished`, at which point data is parsed and stored.
+
+### 2\. Background Scheduler
+
+To ensure reliable monitoring without external dependencies, GeoProbe uses `node-cron` initialized within SvelteKit's `hooks.server.ts`.
+
+> **⚠️ Important Deployment Note:**
+> Since this architecture relies on a persistent background process for the scheduler (`node-cron`), **GeoProbe cannot be deployed on Serverless platforms** like Vercel or Netlify (Serverless functions "sleep" when idle).
+>
+> You must deploy this on a **VPS**, **Docker**, or any platform that supports long-running Node.js processes (e.g., Railway, Fly.io, DigitalOcean).
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* Node.js 18+
+* Docker (Optional but recommended)
+
+### Installation
+
+1.  **Clone the repository**
+
+    ```bash
+    git clone https://github.com/your-username/geoprobe.git
+    cd geoprobe
+    ```
+
+2.  **Install dependencies**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Setup**
+    Copy the example environment file:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    *Inside `.env`:*
+
+    ```env
+    DATABASE_URL=file:./data.db
+    DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+    ```
+
+4.  **Initialize Database**
+    Push the schema using Drizzle Kit:
+
+    ```bash
+    npm run db:push
+    ```
+
+5.  **Run Development Server**
+
+    ```bash
+    npm run dev
+    ```
+
+## 📦 Deployment (Docker)
+
+The easiest way to run GeoProbe is via Docker. This ensures the background workers stay alive.
+
+```yaml
+# docker-compose.yml
+version: '3'
+services:
+  geoprobe:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=file:/app/data/geoprobe.db
+      - ORIGIN=http://localhost:3000
+    command: sh -c "npm install && npm run build && node build"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+```
+
+## 🗺️ Roadmap
+
+- [ ]  Add Telegram & Slack integration.
+- [ ]  Add "Status Page" mode (Public view vs Admin view).
+- [ ]  Support TCP/Ping/DNS checks.
+- [ ]  Compare latency between different ISPs (e.g., VNPT vs Viettel).
+
+## 🤝 Contributing
+
+Contributions are welcome\! Please feel free to submit a Pull Request.
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+-----
+
+*Built with ❤️ using [Globalping](https://globalping.io/).*
+</file>
+
+<file path="svelte.config.js">
+import adapter from '@sveltejs/adapter-node';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter: adapter({ out: 'build' })
+	}
+};
+
+export default config;
+</file>
+
+<file path="tailwind.config.ts">
+import type { Config } from 'tailwindcss';
+import daisyui from 'daisyui';
+
+export default {
+	content: ['./src/**/*.{html,js,svelte,ts}'],
+	theme: {
+		extend: {
+			fontFamily: {
+				sans: ['Inter', 'sans-serif']
+			},
+			colors: {
+				'bg-darkest': '#1a1d21',
+				'bg-card': '#242830',
+				'bg-input': '#2a2f38'
+			}
+		}
+	},
+	plugins: [daisyui],
+	daisyui: {
+		themes: [
+			{
+				dark: {
+					primary: '#10b981',
+					secondary: '#3b82f6',
+					accent: '#f59e0b',
+					neutral: '#1e2228',
+					'base-100': '#1a1d21',
+					error: '#ef4444',
+					success: '#10b981'
+				}
+			}
+		],
+		darkTheme: 'dark'
+	}
+} satisfies Config;
+</file>
+
+<file path="tsconfig.json">
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"rewriteRelativeImportExtensions": true,
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"moduleResolution": "bundler"
+	}
+	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
+	//
+	// To make changes to top-level options such as include and exclude, we recommend extending
+	// the generated config; see https://svelte.dev/docs/kit/configuration#typescript
+}
+</file>
+
+<file path="vite.config.ts">
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	plugins: [sveltekit()]
+});
+</file>
+
+<file path=".gitignore">
+node_modules
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+# Created by https://www.toptal.com/developers/gitignore/api/goland+all,svelte
+# Edit at https://www.toptal.com/developers/gitignore?templates=goland+all,svelte
+
+### GoLand+all ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# Gradle and Maven with auto-import
+# When using Gradle or Maven with auto-import, you should exclude module files,
+# since they will be recreated, and may cause churn.  Uncomment if using
+# auto-import.
+# .idea/artifacts
+# .idea/compiler.xml
+# .idea/jarRepositories.xml
+# .idea/modules.xml
+# .idea/*.iml
+# .idea/modules
+# *.iml
+# *.ipr
+
+# CMake
+cmake-build-*/
+
+# Mongo Explorer plugin
+.idea/**/mongoSettings.xml
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Cursive Clojure plugin
+.idea/replstate.xml
+
+# SonarLint plugin
+.idea/sonarlint/
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Editor-based Rest Client
+.idea/httpRequests
+
+# Android studio 3.1+ serialized cache file
+.idea/caches/build_file_checksums.ser
+
+### GoLand+all Patch ###
+# Ignore everything but code style settings and run configurations
+# that are supposed to be shared within teams.
+
+.idea/*
+
+!.idea/codeStyles
+!.idea/runConfigurations
+
+### Svelte ###
+# gitignore template for the SvelteKit, frontend web component framework
+# website: https://kit.svelte.dev/
+
+.svelte-kit/
+plans
+package
+./*.html
+./docs/image/img.png
+# End of https://www.toptal.com/developers/gitignore/api/goland+all,svelte
+/docs/image/img.png
+/prototype-dashboard.html
+</file>
+
+<file path=".npmrc">
+engine-strict=true
+enable-pre-post-scripts=true
+</file>
+
+<file path="package.json">
+{
+	"name": "globalping-ui",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"db:generate": "drizzle-kit generate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/kit": "^2.48.5",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tailwindcss/postcss": "^4.1.17",
+		"@tailwindcss/typography": "^0.5.19",
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/node-cron": "^3.0.11",
+		"@types/uuid": "^11.0.0",
+		"autoprefixer": "^10.4.22",
+		"daisyui": "^5.5.5",
+		"drizzle-kit": "^0.31.7",
+		"postcss": "^8.5.6",
+		"svelte": "^5.43.8",
+		"svelte-check": "^4.3.4",
+		"tailwindcss": "^3.4.18",
+		"tsx": "^4.20.6",
+		"typescript": "^5.9.3",
+		"vite": "^7.2.2"
+	},
+	"dependencies": {
+		"@sveltejs/adapter-node": "^5.4.0",
+		"better-sqlite3": "^11.10.0",
+		"drizzle-orm": "^0.44.7",
+		"node-cron": "^4.2.1",
+		"uuid": "^13.0.0"
+	}
+}
+</file>
+
+</files>

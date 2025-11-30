@@ -128,3 +128,4 @@ package
 # End of https://www.toptal.com/developers/gitignore/api/goland+all,svelte
 /docs/image/img.png
 /prototype-dashboard.html
+.claude

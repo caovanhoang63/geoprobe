@@ -37,6 +37,7 @@
 	"dependencies": {
 		"@sveltejs/adapter-node": "^5.4.0",
 		"better-sqlite3": "^11.10.0",
+		"chart.js": "^4.5.1",
 		"drizzle-orm": "^0.44.7",
 		"node-cron": "^4.2.1",
 		"uuid": "^13.0.0"
