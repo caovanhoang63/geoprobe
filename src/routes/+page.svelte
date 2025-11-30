@@ -20,6 +20,14 @@
 
 	const { data }: Props = $props();
 
+	interface MeasurementData {
+		id: string;
+		location: string;
+		latency: number;
+		status: string;
+		timestamp: string;
+	}
+
 	interface Monitor {
 		id: string;
 		name: string;
@@ -30,6 +38,10 @@
 		interval?: number;
 		locations?: SelectedLocation[];
 		discordWebhook?: string;
+		measurements?: MeasurementData[];
+		uptime30d?: number;
+		avgLatency?: number;
+		currentLatency?: number;
 	}
 
 	interface ChartDataPoint {
@@ -48,35 +60,91 @@
 
 	type TimeRange = '3h' | '24h' | '7d' | '30d';
 
-	function generateUptimeHistory(): Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> {
+	function generateUptimeHistoryFromMeasurements(
+		measurements: MeasurementData[]
+	): Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> {
+		if (!measurements || measurements.length === 0) {
+			return Array(30).fill(null).map((_, i) => ({
+				status: 'unknown' as const,
+				timestamp: Date.now() - (29 - i) * 60 * 60 * 1000
+			}));
+		}
+
 		const now = Date.now();
 		const history: Array<{ status: 'up' | 'down' | 'unknown'; timestamp: number }> = [];
+
 		for (let i = 29; i >= 0; i--) {
-			const timestamp = now - i * 60 * 60 * 1000;
-			const random = Math.random();
-			const status: 'up' | 'down' | 'unknown' = random > 0.9 ? 'down' : random > 0.85 ? 'unknown' : 'up';
-			history.push({ status, timestamp });
+			const hourStart = now - (i + 1) * 60 * 60 * 1000;
+			const hourEnd = now - i * 60 * 60 * 1000;
+
+			const hourMeasurements = measurements.filter((m) => {
+				const ts = new Date(m.timestamp).getTime();
+				return ts >= hourStart && ts < hourEnd;
+			});
+
+			let status: 'up' | 'down' | 'unknown' = 'unknown';
+			if (hourMeasurements.length > 0) {
+				const successCount = hourMeasurements.filter((m) => m.status === 'success').length;
+				status = successCount / hourMeasurements.length >= 0.5 ? 'up' : 'down';
+			}
+
+			history.push({ status, timestamp: hourEnd });
 		}
+
 		return history;
 	}
 
-	function generateChartData(timeRange: TimeRange, locationIds: string[]): ChartDataPoint[] {
+	function generateChartDataFromMeasurements(
+		measurements: MeasurementData[],
+		timeRange: TimeRange
+	): ChartDataPoint[] {
+		if (!measurements || measurements.length === 0) {
+			return [];
+		}
+
 		const now = Date.now();
-		const data: ChartDataPoint[] = [];
-		const intervals = { '3h': 12, '24h': 24, '7d': 28, '30d': 30 };
-		const msPerInterval = { '3h': 15 * 60 * 1000, '24h': 60 * 60 * 1000, '7d': 6 * 60 * 60 * 1000, '30d': 24 * 60 * 60 * 1000 };
+		const rangeMs = {
+			'3h': 3 * 60 * 60 * 1000,
+			'24h': 24 * 60 * 60 * 1000,
+			'7d': 7 * 24 * 60 * 60 * 1000,
+			'30d': 30 * 24 * 60 * 60 * 1000
+		};
 
-		const count = intervals[timeRange];
-		const interval = msPerInterval[timeRange];
+		const cutoff = now - rangeMs[timeRange];
 
-		for (let i = count - 1; i >= 0; i--) {
-			const timestamp = now - i * interval;
-			for (const locationId of locationIds) {
-				const baseTime = 150 + Math.random() * 200;
-				data.push({ timestamp, location: locationId, responseTime: Math.round(baseTime) });
+		return measurements
+			.filter((m) => new Date(m.timestamp).getTime() >= cutoff)
+			.map((m) => ({
+				timestamp: new Date(m.timestamp).getTime(),
+				location: m.location,
+				responseTime: Math.round(m.latency)
+			}))
+			.sort((a, b) => a.timestamp - b.timestamp);
+	}
+
+	function getUniqueLocations(measurements: MeasurementData[]): LocationConfig[] {
+		if (!measurements || measurements.length === 0) {
+			return [];
+		}
+
+		const locationMap = new Map<string, { latestLatency: number; latestTimestamp: number }>();
+
+		for (const m of measurements) {
+			const ts = new Date(m.timestamp).getTime();
+			const existing = locationMap.get(m.location);
+
+			if (!existing || ts > existing.latestTimestamp) {
+				locationMap.set(m.location, { latestLatency: m.latency, latestTimestamp: ts });
 			}
 		}
-		return data;
+
+		return Array.from(locationMap.entries()).map(([location, data], index) => ({
+			id: location,
+			name: location,
+			color: LOCATION_COLORS[index % LOCATION_COLORS.length] ?? '#888888',
+			value: Math.round(data.latestLatency),
+			enabled: true
+		}));
 	}
 
 	const realtime = createRealtimeStore();
@@ -84,16 +152,21 @@
 	const monitors = $derived(
 		data.monitors.map((m) => {
 			const realtimeUpdate = realtime.getMonitorUpdate(m.id);
+			const measurements = (m as { measurements?: MeasurementData[] }).measurements ?? [];
 			return {
 				id: m.id,
 				name: m.name,
 				url: m.url,
 				status: (realtimeUpdate?.status ?? (m.latestStatus === 'unknown' ? 'down' : m.latestStatus)) as 'up' | 'down',
 				uptimePercentage: realtimeUpdate?.uptime24h ?? m.uptime24h,
-				uptimeHistory: generateUptimeHistory(),
+				uptimeHistory: generateUptimeHistoryFromMeasurements(measurements),
 				interval: m.interval,
 				locations: JSON.parse(m.locations),
-				discordWebhook: ''
+				discordWebhook: '',
+				measurements,
+				uptime30d: (m as { uptime30d?: number }).uptime30d ?? 100,
+				avgLatency: (m as { avgLatency?: number }).avgLatency ?? 0,
+				currentLatency: (m as { currentLatency?: number }).currentLatency ?? 0
 			};
 		})
 	);
@@ -112,29 +185,47 @@
 			realtime.disconnect();
 		};
 	});
+
 	let chartTimeRange: TimeRange = $state('24h');
-	let chartLocations: LocationConfig[] = $state([
-		{ id: 'us-east', name: 'US East', color: LOCATION_COLORS[0], value: 142, enabled: true },
-		{ id: 'eu-west', name: 'EU West', color: LOCATION_COLORS[1], value: 198, enabled: true },
-		{ id: 'asia-sg', name: 'Asia (SG)', color: LOCATION_COLORS[2], value: 267, enabled: true },
-		{ id: 'au-syd', name: 'Australia', color: LOCATION_COLORS[3], value: 312, enabled: true }
-	]);
 
 	let formModalOpen = $state(false);
 	let formMode: MonitorFormMode = $state('create');
 	let editMonitorData = $state<MonitorEditData | undefined>(undefined);
 
-	const selectedMonitor = $derived(monitors.find((m) => m.id === selectedMonitorId)!);
+	const selectedMonitor = $derived(monitors.find((m) => m.id === selectedMonitorId));
 
-	const enabledLocations = $derived(chartLocations.filter((l) => l.enabled));
+	const chartLocations = $derived(
+		selectedMonitor?.measurements
+			? getUniqueLocations(selectedMonitor.measurements)
+			: []
+	);
 
-	const chartData = $derived(generateChartData(chartTimeRange, enabledLocations.map((l) => l.id)));
+	let enabledLocationIds = $state<Set<string>>(new Set());
+
+	$effect(() => {
+		if (chartLocations.length > 0 && enabledLocationIds.size === 0) {
+			enabledLocationIds = new Set(chartLocations.map((l) => l.id));
+		}
+	});
+
+	const enabledLocations = $derived(
+		chartLocations.map((l) => ({ ...l, enabled: enabledLocationIds.has(l.id) }))
+	);
+
+	const chartData = $derived(
+		selectedMonitor?.measurements
+			? generateChartDataFromMeasurements(
+					selectedMonitor.measurements.filter((m) => enabledLocationIds.has(m.location)),
+					chartTimeRange
+				)
+			: []
+	);
 
 	const metricsData = $derived({
-		currentResponse: 156,
-		avgResponse24h: 189,
+		currentResponse: selectedMonitor?.currentLatency ?? 0,
+		avgResponse24h: selectedMonitor?.avgLatency ?? 0,
 		uptime24h: selectedMonitor?.uptimePercentage ?? 100,
-		uptime30d: 99.8,
+		uptime30d: selectedMonitor?.uptime30d ?? 100,
 		certExpiry: 45,
 		certUrl: selectedMonitor?.url
 	});
@@ -277,9 +368,12 @@
 	}
 
 	function handleLocationToggle(locationId: string): void {
-		chartLocations = chartLocations.map((loc) =>
-			loc.id === locationId ? { ...loc, enabled: !loc.enabled } : loc
-		);
+		if (enabledLocationIds.has(locationId)) {
+			enabledLocationIds.delete(locationId);
+		} else {
+			enabledLocationIds.add(locationId);
+		}
+		enabledLocationIds = new Set(enabledLocationIds);
 	}
 </script>
 
@@ -346,7 +440,7 @@
 					onTimeRangeChange={handleTimeRangeChange}
 				/>
 				<div class="mt-4">
-					<LocationLegend locations={chartLocations} onToggle={handleLocationToggle} />
+					<LocationLegend locations={enabledLocations} onToggle={handleLocationToggle} />
 				</div>
 			</div>
 
