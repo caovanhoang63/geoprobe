@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+build
+.svelte-kit
+.output
+.vercel
+.netlify
+.wrangler
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation and config
+*.md
+!README.md
+docs/
+plans/
+
+# Test and coverage
+coverage/
+.nyc_output/
+*.test.ts
+*.spec.ts
+__tests__/
+vitest.config.ts
+
+# Claude/AI configs
+.claude/
+.opencode/
+
+# Misc
+*.log
+*.tgz
+repomix-output.xml

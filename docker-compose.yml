@@ -1,0 +1,26 @@
+services:
+  geoprobe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoprobe
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - geoprobe_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/geoprobe.db
+      # Optional: Discord webhook for alerts
+      # - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  geoprobe_data:
+    driver: local
