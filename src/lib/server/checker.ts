@@ -7,7 +7,7 @@ import type { Monitor, Measurement } from './schema';
 import type { LocationFilter } from '$lib/types/globalping';
 import { eq, desc, gte, and } from 'drizzle-orm';
 
-function extractHostAndPath(url: string): { host: string; path: string; protocol: string } {
+export function extractHostAndPath(url: string): { host: string; path: string; protocol: string } {
 	try {
 		const parsed = new URL(url);
 		return {
@@ -20,7 +20,7 @@ function extractHostAndPath(url: string): { host: string; path: string; protocol
 	}
 }
 
-interface StoredLocationItem {
+export interface StoredLocationItem {
 	location?: {
 		type?: string;
 		code?: string;
@@ -33,7 +33,7 @@ interface StoredLocationItem {
 	tags?: string[];
 }
 
-function convertToGlobalpingLocations(storedLocations: StoredLocationItem[]): LocationFilter[] {
+export function convertToGlobalpingLocations(storedLocations: StoredLocationItem[]): LocationFilter[] {
 	return storedLocations.map((item) => {
 		const filter: LocationFilter = {};
 

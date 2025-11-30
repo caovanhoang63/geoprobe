@@ -9,8 +9,8 @@ let cronJob: ScheduledTask | null = null;
 const activeChecks = new Set<string>();
 const MAX_CONCURRENT_CHECKS = 10;
 
-function isMonitorDueForCheck(monitor: Monitor): boolean {
-	if (activeChecks.has(monitor.id)) {
+export function isMonitorDueForCheck(monitor: Monitor, activeChecksSet: Set<string> = activeChecks): boolean {
+	if (activeChecksSet.has(monitor.id)) {
 		return false;
 	}
 
@@ -63,7 +63,7 @@ async function runScheduledChecks(): Promise<void> {
 
 	try {
 		const activeMonitors = await db.select().from(monitors).where(eq(monitors.active, true));
-		const dueMonitors = activeMonitors.filter(isMonitorDueForCheck);
+		const dueMonitors = activeMonitors.filter((m) => isMonitorDueForCheck(m));
 
 		if (dueMonitors.length === 0) {
 			console.log('[Cron] No monitors due for check');
