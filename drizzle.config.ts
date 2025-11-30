@@ -5,6 +5,6 @@ export default {
 	out: './migrations',
 	dialect: 'sqlite',
 	dbCredentials: {
-		url: process.env.DATABASE_URL || 'file:./geoprobe.db'
+		url: process.env.DATABASE_URL || 'file:./data.db'
 	}
 } satisfies Config;

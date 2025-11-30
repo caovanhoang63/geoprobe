@@ -7,16 +7,80 @@ import type { Monitor, Measurement } from './schema';
 import type { LocationFilter } from '$lib/types/globalping';
 import { eq, desc, gte, and } from 'drizzle-orm';
 
+function extractHostAndPath(url: string): { host: string; path: string; protocol: string } {
+	try {
+		const parsed = new URL(url);
+		return {
+			host: parsed.host,
+			path: parsed.pathname + parsed.search,
+			protocol: parsed.protocol.replace(':', '')
+		};
+	} catch {
+		return { host: url, path: '/', protocol: 'https' };
+	}
+}
+
+interface StoredLocationItem {
+	location?: {
+		type?: string;
+		code?: string;
+		name?: string;
+	};
+	networkType?: string;
+	country?: string;
+	continent?: string;
+	city?: string;
+	tags?: string[];
+}
+
+function convertToGlobalpingLocations(storedLocations: StoredLocationItem[]): LocationFilter[] {
+	return storedLocations.map((item) => {
+		const filter: LocationFilter = {};
+
+		if (item.location) {
+			const loc = item.location;
+			if (loc.type === 'continent') {
+				filter.continent = loc.code;
+			} else if (loc.type === 'country') {
+				filter.country = loc.code;
+			} else if (loc.type === 'city') {
+				filter.city = loc.name;
+			}
+
+			if (item.networkType && item.networkType !== 'any') {
+				filter.tags = [item.networkType];
+			}
+		} else {
+			if (item.country) filter.country = item.country;
+			if (item.continent) filter.continent = item.continent;
+			if (item.city) filter.city = item.city;
+			if (item.tags) filter.tags = item.tags;
+		}
+
+		return filter;
+	});
+}
+
 export async function checkMonitor(monitor: Monitor): Promise<void> {
-	const locations: LocationFilter[] = JSON.parse(monitor.locations);
+	const storedLocations: StoredLocationItem[] = JSON.parse(monitor.locations);
+	const locations = convertToGlobalpingLocations(storedLocations);
+	console.log(`[Checker] Converted locations:`, JSON.stringify(locations));
+	const { host, path, protocol } = extractHostAndPath(monitor.url);
 
 	console.log(`[Checker] Starting check for ${monitor.name} (${monitor.url})`);
 
 	const response = await runMeasurement({
 		type: 'http',
-		target: monitor.url,
+		target: host,
 		locations,
-		options: { timeout: 10000 }
+		measurementOptions: {
+			protocol: protocol as 'http' | 'https',
+			port: protocol === 'https' ? 443 : 80,
+			request: {
+				path,
+				host
+			}
+		}
 	});
 
 	if (response.status === 'failed') {

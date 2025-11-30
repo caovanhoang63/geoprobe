@@ -43,7 +43,7 @@ export function initializeCron(): void {
 		return;
 	}
 
-	cronJob = cron.schedule('*/5 * * * *', runAllChecks);
+	cronJob = cron.schedule('*/1 * * * *', runAllChecks);
 
 	console.log('[Cron] Scheduler initialized - checks every 5 minutes');
 }

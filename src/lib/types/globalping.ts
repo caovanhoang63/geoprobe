@@ -9,8 +9,14 @@ export interface GlobalpingRequest {
 	type: 'http';
 	target: string;
 	locations: LocationFilter[];
-	options?: {
-		timeout?: number;
+	measurementOptions?: {
+		protocol?: 'http' | 'https';
+		port?: number;
+		request?: {
+			path?: string;
+			host?: string;
+			headers?: Record<string, string>;
+		};
 	};
 }
 
